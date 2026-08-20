@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f97316">
+  <meta name="background-color" content="#f8f6f1">
+  <meta name="description" content="PetFit Sync — Gestão de hábitos para pets e tutores. Conecte-se diariamente com saúde e movimento.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PetFit Sync">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="msapplication-TileColor" content="#f97316">
+  <meta name="msapplication-TileImage" content="assets/icons/icon-192x192.png">
+
+  <title>PetFit Sync</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="assets/icons/icon-512x512.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== ÁREA SUPERIOR (TOP ZONE) — INFORMAÇÃO ESTÁTICA ==================== -->
+  <header class="app-header" id="appHeader">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">🐾</span>
+        <div class="brand-text">
+          <h1>PetFit Sync</h1>
+          <span class="brand-tagline">Conexão diária em movimento</span>
+        </div>
+      </div>
+      <button class="btn-icon header-avatar-btn" id="btnProfile" aria-label="Perfil do pet">
+        <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Avatar do pet" class="header-avatar">
+      </button>
+    </div>
+  </header>
+
+  <!-- Painel de Progresso e Energia (Top Zone) -->
+  <section class="dashboard-panel" id="dashboardPanel">
+    <div class="dashboard-inner">
+      <!-- Progresso do Dia -->
+      <div class="progress-block">
+        <div class="progress-header">
+          <span class="progress-label">Progresso do Dia</span>
+          <span class="progress-value" id="progressValue">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <p class="progress-sub" id="progressSub">Nenhum hábito concluído ainda</p>
+      </div>
+
+      <!-- Nível de Energia da Dupla -->
+      <div class="energy-block" id="energyBlock">
+        <div class="energy-icon-wrap">
+          <span class="energy-icon" id="energyIcon">💤</span>
+        </div>
+        <div class="energy-info">
+          <span class="energy-label">Energia da Dupla</span>
+          <span class="energy-level" id="energyLevel">Baixa</span>
+          <span class="energy-hint" id="energyHint">Complete hábitos para energizar!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CONTEÚDO PRINCIPAL (SCROLLÁVEL) ==================== -->
+  <main class="main-content" id="mainContent">
+    <div class="main-inner">
+      <!-- Filtro de Categoria -->
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-chip active" data-filter="all">Todos</button>
+        <button class="filter-chip" data-filter="alimentacao">🍖 Alimentação</button>
+        <button class="filter-chip" data-filter="passeio">🦮 Passeio</button>
+        <button class="filter-chip" data-filter="medicacao">💊 Medicação</button>
+        <button class="filter-chip" data-filter="escovacao">🪮 Escovação</button>
+        <button class="filter-chip" data-filter="brincadeira">🎾 Brincadeira</button>
+      </div>
+
+      <!-- Lista de Hábitos -->
+      <div class="habits-list" id="habitsList">
+        <!-- Inserido via JS -->
+      </div>
+
+      <!-- Espaço de scroll para não ficar atrás da nav inferior -->
+      <div class="scroll-spacer"></div>
+    </div>
+  </main>
+
+  <!-- ==================== ÁREA INFERIOR (THUMB ZONE) — INTERAÇÃO PRINCIPAL ==================== -->
+
+  <!-- Barra de Ação Rápida (acima da navegação) -->
+  <div class="quick-actions" id="quickActions">
+    <button class="quick-btn" id="btnSyncNow" aria-label="Sincronizar agora">
+      <span class="quick-icon">⚡</span>
+      <span class="quick-label">Sincronizar</span>
+    </button>
+    <button class="quick-btn" id="btnAddHabit" aria-label="Novo hábito">
+      <span class="quick-icon">+</span>
+      <span class="quick-label">Novo Hábito</span>
+    </button>
+  </div>
+
+  <!-- Navegação Inferior Fixa (Thumb Zone) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" data-tab="today" aria-label="Hoje">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Hoje</span>
+    </button>
+    <button class="nav-item" data-tab="pet" aria-label="Pet">
+      <span class="nav-icon">🐕</span>
+      <span class="nav-label">Pet</span>
+    </button>
+    <button class="nav-item" data-tab="stats" aria-label="Evolução">
+      <span class="nav-icon">📈</span>
+      <span class="nav-label">Evolução</span>
+    </button>
+    <button class="nav-item" data-tab="settings" aria-label="Ajustes">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Ajustes</span>
+    </button>
+  </nav>
+
+  <!-- ==================== MODAIS (THUMB-FRIENDLY — AÇÕES NA PARTE INFERIOR) ==================== -->
+
+  <!-- Modal: Adicionar Hábito -->
+  <div class="modal-overlay" id="modalAddHabit">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Novo Hábito</h2>
+        <button class="btn-icon modal-close" id="closeAddHabit" aria-label="Fechar">
+          <span>✕</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="habitTitle">Nome do hábito</label>
+          <input type="text" id="habitTitle" placeholder="Ex.: Alimentação da tarde" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="habitCategory">Categoria</label>
+          <select id="habitCategory">
+            <option value="alimentacao">🍖 Alimentação</option>
+            <option value="passeio">🦮 Passeio</option>
+            <option value="medicacao">💊 Medicação</option>
+            <option value="escovacao">🪮 Escovação</option>
+            <option value="brincadeira">🎾 Brincadeira</option>
+            <option value="higiene">🛁 Higiene</option>
+            <option value="outro">✨ Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="habitTime">Horário</label>
+          <input type="time" id="habitTime" value="12:00">
+        </div>
+      </div>
+      <!-- Botão de ação na parte inferior do modal (Thumb Zone) -->
+      <div class="modal-footer">
+        <button class="btn-primary btn-full" id="saveHabitBtn">Salvar Hábito</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Sugestão de Exercício (aparece ao interagir com hábito) -->
+  <div class="modal-overlay" id="modalExercise">
+    <div class="modal-sheet modal-exercise">
+      <div class="modal-handle"></div>
+      <div class="exercise-visual">
+        <span class="exercise-emoji" id="exerciseEmoji">🏃</span>
+      </div>
+      <div class="exercise-content">
+        <h3 id="exerciseTitle">Hora de se mexer!</h3>
+        <p class="exercise-text" id="exerciseText">Enquanto cuida do pet, aproveite para cuidar de você também.</p>
+        <div class="exercise-card">
+          <span class="exercise-card-icon">💪</span>
+          <p class="exercise-card-text" id="exerciseSuggestion">Faça 10 agachamentos enquanto prepara a ração</p>
+        </div>
+        <p class="exercise-tip">Dica: complete o exercício antes de marcar o hábito como feito!</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary btn-full" id="dismissExercise">Fechar</button>
+        <button class="btn-primary btn-full" id="doneExercise">Concluir & Marcar Hábito</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Perfil do Pet -->
+  <div class="modal-overlay" id="modalProfile">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Perfil da Dupla</h2>
+        <button class="btn-icon modal-close" id="closeProfile" aria-label="Fechar">
+          <span>✕</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-card">
+          <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Pet" class="profile-avatar">
+          <div class="profile-info">
+            <input type="text" id="petName" value="Rex" class="profile-input" placeholder="Nome do pet">
+            <input type="text" id="tutorName" value="Tutor" class="profile-input" placeholder="Seu nome">
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="stat-box">
+            <span class="stat-number" id="statStreak">0</span>
+            <span class="stat-label">Dias seguidos</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" id="statTotal">0</span>
+            <span class="stat-label">Hábitos hoje</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" id="statDone">0</span>
+            <span class="stat-label">Concluídos</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary btn-full" id="saveProfileBtn">Salvar Perfil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Evolução / Stats -->
+  <div class="modal-overlay" id="modalStats">
+    <div class="modal-sheet modal-tall">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Evolução da Dupla</h2>
+        <button class="btn-icon modal-close" id="closeStats" aria-label="Fechar">
+          <span>✕</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-card-icon">🔥</span>
+            <span class="stat-card-value" id="statsStreak">0</span>
+            <span class="stat-card-label">Dias em sequência</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card-icon">✅</span>
+            <span class="stat-card-value" id="statsTotalDone">0</span>
+            <span class="stat-card-label">Total concluído</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card-icon">⚡</span>
+            <span class="stat-card-value" id="statsEnergy">0%</span>
+            <span class="stat-card-label">Energia média</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card-icon">🏃</span>
+            <span class="stat-card-value" id="statsExercises">0</span>
+            <span class="stat-card-label">Exercícios feitos</span>
+          </div>
+        </div>
+        <div class="history-section">
+          <h3>Histórico dos últimos 7 dias</h3>
+          <div class="history-bars" id="historyBars">
+            <!-- Inserido via JS -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary btn-full" id="closeStatsBtn">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ==================== OFFLINE BANNER ==================== -->
+  <div class="offline-banner" id="offlineBanner">
+    <span>📡 Sem conexão — seus dados estão salvos localmente</span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
