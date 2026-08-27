@@ -1,85 +1,103 @@
-# 🐾 PetFit Sync v2.0
+# 🐾 PetFit Sync
 
-PWA de Gestão de Hábitos para **Pets e Tutores** com **Skeleton Screens** e **DataLayer Firebase-ready**.
+PWA de Gestão de Hábitos para **Pets e Tutores**.
 
-## ✨ Novidades v2.0
+> **Versão atual:** 3.0 | **Gestures + Skeletons + Firebase-ready**
 
-### 🦴 Skeleton Screens
-- Estados de carregamento visuais (shimmer effect) em **toda a interface**
-- Progresso, Energia da Dupla e Lista de Hábitos possuem skeletons dedicados
-- Fade suave ao trocar de skeleton para conteúdo real
-- Simula latência de rede para garantir que o skeleton apareça
+---
 
-### 🔥 DataLayer — Troque facilmente para Firebase
-O código possui uma **camada de dados abstrata** que permite alternar entre:
-- ✅ **localStorage** (padrão — funciona offline, zero config)
-- 🔥 **Firebase Firestore** (cloud — sincronização entre dispositivos)
+## 📜 Histórico de Versões
 
-## 🚀 Como ativar o Firebase
+### 🚀 v1.0 — Fundação
+> *Lançamento inicial com conceito Thumb-Friendly*
 
-### Passo 1: Crie o projeto no Firebase
-1. Acesse [console.firebase.google.com](https://console.firebase.google.com)
-2. Clique em **"Add project"** → dê um nome → **Continue**
-3. Ative o **Firestore Database** (modo de teste)
-4. Ative a **Authentication** → método **Anonymous**
+- ✅ **Acompanhamento Duplo**: Hábitos do pet + exercícios para o tutor
+- ✅ **Microexercícios Dinâmicos**: Sugestões por categoria (alimentação, passeio, medicação, etc.)
+- ✅ **Energia da Dupla**: Indicador visual de sintonia pet + tutor
+- ✅ **Thumb-Friendly Zone**: Navegação inferior, ações na base, touch targets ≥48px
+- ✅ **PWA Completo**: Manifest, Service Worker, offline support
+- ✅ **localStorage**: Persistência local de dados
+- ✅ **Reset Diário Automático**: Hábitos resetam a cada dia com histórico
+- ✅ **7 Hábitos Padrão**: Alimentação, passeio, escovação, medicação, brincadeira
+- ✅ **Dark/Warm Theme**: Paleta off-white + laranja coral
+- ✅ **Fonte Inter**: Ótima legibilidade mobile
+- ✅ **Swipe-to-Dismiss nos Modais**: Fechar arrastando para baixo
+- ✅ **Haptic Feedback**: Vibração sutil nos botões
 
-### Passo 2: Copie as credenciais
-No menu **Project Settings → General → Your apps → Web app**, copie o objeto `firebaseConfig`.
+---
 
-### Passo 3: Configure no projeto
-Edite o arquivo `script.js`:
+### 🔥 v2.0 — Skeletons + Firebase
+> *Estados de carregamento e camada de dados abstrata*
 
-```javascript
-// 1. DESCOMENTE a seção de configuração do Firebase (linha ~20)
-const firebaseConfig = {
-  apiKey: "SUA_API_KEY_AQUI",
-  authDomain: "seu-projeto.firebaseapp.com",
-  projectId: "seu-projeto",
-  // ... restante das credenciais
-};
+#### 🦴 Skeleton Screens
+- Skeleton com **efeito shimmer** em toda a interface
+- Estados de carregamento em: Progresso do Dia, Energia da Dupla, Lista de Hábitos
+- **Fade suave** ao trocar skeleton → conteúdo real
+- Simula latência de rede para garantir visualização do skeleton
 
-// 2. DESCOMENTE a inicialização
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+#### 🔥 DataLayer — Firebase-ready
+- **Camada de dados abstrata**: troque `localStorage` ↔ `Firebase Firestore` com 1 linha
+- Driver `localStorage` (padrão, zero config, offline)
+- Driver `Firebase` (cloud, sincronização entre dispositivos)
+- Autenticação anônima integrada
+- Para ativar: mude `useFirebase: true` e descomente os SDKs
 
-// 3. ATIVE o driver Firebase
-const CONFIG = {
-  useFirebase: true,  // ← mude de false para true
-  // ...
-};
-```
+---
 
-### Passo 4: Ative os scripts no HTML
-No `index.html`, **descomente** as 3 linhas do Firebase SDK (no `<head>`):
+### 👆 v3.0 — Gestures (ATUAL)
+> *Navegação por gestos nativos de mobile*
 
-```html
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-```
+#### ⬇️ Pull-to-Refresh
+- **Puxe para baixo** na lista de hábitos para sincronizar dados
+- Indicador visual com ícone rotativo e texto de status
+- Animação suave de retorno após sincronização
 
-Pronto! Agora os dados serão salvos no Firestore e sincronizados entre dispositivos. 🎉
+#### 👈👉 Swipe nos Cards de Hábito
+- **Deslize para a ESQUERDA** → Completa o hábito (abre modal de exercício)
+- **Deslize para a DIREITA** → Desmarca o hábito (se já estiver concluído)
+- Background colorido revela a ação durante o swipe (verde = completar, vermelho = desfazer)
+- Snap automático com animação elástica
+
+#### 👆 Long-Press (Toque Longo)
+- **Segure** qualquer card de hábito por 500ms
+- Abre **menu de contexto** com opções:
+  - ✅ Concluir / ↩️ Desmarcar
+  - 💪 Ver exercício
+  - ✏️ Editar (em breve)
+  - 🗑️ Excluir
+- Vibração tátil ao ativar (haptic feedback)
+- Fecha ao tocar fora do menu
+
+#### 💡 Gesture Hint
+- Banner educativo na primeira abertura explicando os gestos
+- "Deslize o hábito para ações rápidas · Segure para menu"
+- Fecha permanentemente após dismiss (salvo no localStorage/Firebase)
+
+---
 
 ## 📁 Estrutura (3 arquivos principais)
 
 ```
 petfit-sync/
-├── index.html       ← Skeletons + Firebase SDK (comentado)
-├── style.css        ← Skeleton Screens com shimmer + Thumb Zone
-├── script.js        ← DataLayer (localStorage/Firebase) + SkeletonManager
+├── index.html       ← Skeletons + Firebase SDK + Gesture areas
+├── style.css        ← Skeleton shimmer + Thumb Zone + Gesture styles
+├── script.js        ← DataLayer + SkeletonManager + GestureEngine + App
 ├── manifest.json    ← PWA manifest
 └── assets/
-    └── icons/       ← Ícones placeholder
+    └── icons/       ← Placeholders (substitua por PNGs reais)
 ```
 
-## 🎨 Skeleton Screens implementados
+---
 
-| Área | Skeleton | Efeito |
-|---|---|---|
-| **Progresso do Dia** | Barra + texto | Shimmer horizontal |
-| **Energia da Dupla** | Círculo + 3 linhas | Shimmer horizontal |
-| **Lista de Hábitos** | 5 cards esqueleto | Shimmer + layout real |
+## 🚀 Como ativar o Firebase
+
+1. Crie projeto em [console.firebase.google.com](https://console.firebase.google.com)
+2. Ative **Firestore Database** (modo teste) e **Authentication** (Anonymous)
+3. No `script.js`, descomente a seção Firebase e mude `useFirebase: true`
+4. No `index.html`, descomente os 3 scripts do Firebase SDK
+5. Substitua as credenciais pelo seu `firebaseConfig`
+
+---
 
 ## 🚀 Deploy no Vercel
 
@@ -90,14 +108,29 @@ npx vercel --prod
 
 Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 
-## ⚡ Funcionalidades completas
-- ✅ **Skeleton Screens** com efeito shimmer em toda a UI
-- ✅ **DataLayer abstrata** — troque localStorage ↔ Firebase com 1 linha
-- ✅ **Thumb-Friendly Zone** — navegação e ações na parte inferior
-- ✅ **Microexercícios** — sugestões dinâmicas por categoria
-- ✅ **Reset diário automático** — hábitos resetam a cada dia
-- ✅ **Histórico 7 dias** — gráfico de barras na tela de Evolução
-- ✅ **Streak** — dias consecutivos com ≥50% de conclusão
-- ✅ **Service Worker** — funcionamento offline
-- ✅ **Haptic feedback** — vibração sutil nos botões
-- ✅ **Swipe to dismiss** — gesto natural nos modais
+---
+
+## ⚡ Funcionalidades Completas (v3.0)
+
+| Categoria | Feature | Status |
+|---|---|---|
+| **Gestures** | Pull-to-Refresh | ✅ |
+| **Gestures** | Swipe Left/Right nos cards | ✅ |
+| **Gestures** | Long-Press menu de contexto | ✅ |
+| **Gestures** | Swipe-to-Dismiss nos modais | ✅ |
+| **Gestures** | Gesture Hint educativo | ✅ |
+| **UI** | Skeleton Screens com shimmer | ✅ |
+| **UI** | Thumb-Friendly Zone | ✅ |
+| **Dados** | DataLayer (localStorage/Firebase) | ✅ |
+| **Dados** | Reset diário automático | ✅ |
+| **Dados** | Histórico 7 dias com gráfico | ✅ |
+| **Dados** | Streak de dias consecutivos | ✅ |
+| **PWA** | Service Worker (offline) | ✅ |
+| **PWA** | Manifest + Ícones | ✅ |
+| **UX** | Haptic feedback | ✅ |
+| **UX** | Toast notifications | ✅ |
+| **UX** | Offline banner | ✅ |
+
+---
+
+<p align="center">Feito com 🐾 pensando na saúde da dupla</p>

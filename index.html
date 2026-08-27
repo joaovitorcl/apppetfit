@@ -25,8 +25,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- ═══════════════════════════════════════════════════════
-       FIREBASE SDK — DESCOMENTE AS LINHAS ABAIXO PARA USAR
-       SUBSTITUA "SEU-PROJETO" PELO SEU PROJETO DO CONSOLE
+       FIREBASE SDK — DESCOMENTE PARA USAR FIREBASE
        ═══════════════════════════════════════════════════════ -->
   <!--
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -54,18 +53,26 @@
     </div>
   </header>
 
+  <!-- Indicador de Pull-to-Refresh -->
+  <div class="ptr-indicator" id="ptrIndicator">
+    <div class="ptr-spinner">
+      <span class="ptr-icon">🔄</span>
+      <span class="ptr-text">Puxe para sincronizar</span>
+    </div>
+  </div>
+
   <!-- ==================== DASHBOARD (TOP ZONE) ==================== -->
   <section class="dashboard-panel" id="dashboardPanel">
     <div class="dashboard-inner">
 
-      <!-- SKELETON: Progresso (mostrado enquanto carrega) -->
+      <!-- SKELETON: Progresso -->
       <div class="progress-block skeleton-active" id="skeletonProgress">
         <div class="skeleton skeleton-text" style="width: 120px; height: 14px; margin-bottom: 12px;"></div>
         <div class="skeleton skeleton-bar" style="width: 100%; height: 8px; border-radius: 999px;"></div>
         <div class="skeleton skeleton-text" style="width: 180px; height: 12px; margin-top: 10px;"></div>
       </div>
 
-      <!-- REAL: Progresso (escondido inicialmente) -->
+      <!-- REAL: Progresso -->
       <div class="progress-block" id="realProgress" style="display:none;">
         <div class="progress-header">
           <span class="progress-label">Progresso do Dia</span>
@@ -77,7 +84,7 @@
         <p class="progress-sub" id="progressSub">Carregando...</p>
       </div>
 
-      <!-- SKELETON: Energia (mostrado enquanto carrega) -->
+      <!-- SKELETON: Energia -->
       <div class="energy-block skeleton-active" id="skeletonEnergy">
         <div class="skeleton skeleton-circle" style="width: 48px; height: 48px; flex-shrink:0;"></div>
         <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
@@ -87,7 +94,7 @@
         </div>
       </div>
 
-      <!-- REAL: Energia (escondido inicialmente) -->
+      <!-- REAL: Energia -->
       <div class="energy-block low" id="realEnergy" style="display:none;">
         <div class="energy-icon-wrap">
           <span class="energy-icon" id="energyIcon">💤</span>
@@ -102,11 +109,11 @@
     </div>
   </section>
 
-  <!-- ==================== CONTEÚDO PRINCIPAL (SCROLLÁVEL) ==================== -->
+  <!-- ==================== CONTEÚDO PRINCIPAL (SCROLLÁVEL + GESTURES) ==================== -->
   <main class="main-content" id="mainContent">
     <div class="main-inner">
 
-      <!-- Filtro de Categoria -->
+      <!-- Filtro de Categoria (swipeable) -->
       <div class="filter-bar" id="filterBar">
         <button class="filter-chip active" data-filter="all">Todos</button>
         <button class="filter-chip" data-filter="alimentacao">🍖 Alimentação</button>
@@ -116,7 +123,14 @@
         <button class="filter-chip" data-filter="brincadeira">🎾 Brincadeira</button>
       </div>
 
-      <!-- SKELETON: Lista de Hábitos (mostrado enquanto carrega) -->
+      <!-- Hint de gestos -->
+      <div class="gesture-hint" id="gestureHint">
+        <span class="gesture-hint-icon">👆</span>
+        <span class="gesture-hint-text">Deslize o hábito para ações rápidas · Segure para menu</span>
+        <button class="gesture-hint-close" id="closeGestureHint">✕</button>
+      </div>
+
+      <!-- SKELETON: Lista de Hábitos -->
       <div class="habits-list skeleton-active" id="skeletonHabitsList">
         <div class="habit-card-skeleton">
           <div class="skeleton skeleton-circle" style="width:44px; height:44px;"></div>
@@ -160,7 +174,7 @@
         </div>
       </div>
 
-      <!-- REAL: Lista de Hábitos (escondido inicialmente) -->
+      <!-- REAL: Lista de Hábitos -->
       <div class="habits-list" id="habitsList" style="display:none;">
         <!-- Inserido via JS -->
       </div>
@@ -337,9 +351,7 @@
         </div>
         <div class="history-section">
           <h3>Histórico dos últimos 7 dias</h3>
-          <div class="history-bars" id="historyBars">
-            <!-- Inserido via JS -->
-          </div>
+          <div class="history-bars" id="historyBars"></div>
         </div>
       </div>
       <div class="modal-footer">
