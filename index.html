@@ -24,11 +24,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
+  <!-- ═══════════════════════════════════════════════════════
+       FIREBASE SDK — DESCOMENTE AS LINHAS ABAIXO PARA USAR
+       SUBSTITUA "SEU-PROJETO" PELO SEU PROJETO DO CONSOLE
+       ═══════════════════════════════════════════════════════ -->
+  <!--
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  -->
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ==================== ÁREA SUPERIOR (TOP ZONE) — INFORMAÇÃO ESTÁTICA ==================== -->
+  <!-- ==================== ÁREA SUPERIOR (TOP ZONE) ==================== -->
   <header class="app-header" id="appHeader">
     <div class="header-inner">
       <div class="brand">
@@ -39,16 +49,24 @@
         </div>
       </div>
       <button class="btn-icon header-avatar-btn" id="btnProfile" aria-label="Perfil do pet">
-        <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Avatar do pet" class="header-avatar">
+        <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Avatar do pet" class="header-avatar" id="headerAvatarImg">
       </button>
     </div>
   </header>
 
-  <!-- Painel de Progresso e Energia (Top Zone) -->
+  <!-- ==================== DASHBOARD (TOP ZONE) ==================== -->
   <section class="dashboard-panel" id="dashboardPanel">
     <div class="dashboard-inner">
-      <!-- Progresso do Dia -->
-      <div class="progress-block">
+
+      <!-- SKELETON: Progresso (mostrado enquanto carrega) -->
+      <div class="progress-block skeleton-active" id="skeletonProgress">
+        <div class="skeleton skeleton-text" style="width: 120px; height: 14px; margin-bottom: 12px;"></div>
+        <div class="skeleton skeleton-bar" style="width: 100%; height: 8px; border-radius: 999px;"></div>
+        <div class="skeleton skeleton-text" style="width: 180px; height: 12px; margin-top: 10px;"></div>
+      </div>
+
+      <!-- REAL: Progresso (escondido inicialmente) -->
+      <div class="progress-block" id="realProgress" style="display:none;">
         <div class="progress-header">
           <span class="progress-label">Progresso do Dia</span>
           <span class="progress-value" id="progressValue">0%</span>
@@ -56,26 +74,38 @@
         <div class="progress-track">
           <div class="progress-fill" id="progressFill" style="width: 0%"></div>
         </div>
-        <p class="progress-sub" id="progressSub">Nenhum hábito concluído ainda</p>
+        <p class="progress-sub" id="progressSub">Carregando...</p>
       </div>
 
-      <!-- Nível de Energia da Dupla -->
-      <div class="energy-block" id="energyBlock">
+      <!-- SKELETON: Energia (mostrado enquanto carrega) -->
+      <div class="energy-block skeleton-active" id="skeletonEnergy">
+        <div class="skeleton skeleton-circle" style="width: 48px; height: 48px; flex-shrink:0;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+          <div class="skeleton skeleton-text" style="width: 100px; height: 12px;"></div>
+          <div class="skeleton skeleton-text" style="width: 140px; height: 16px;"></div>
+          <div class="skeleton skeleton-text" style="width: 200px; height: 12px;"></div>
+        </div>
+      </div>
+
+      <!-- REAL: Energia (escondido inicialmente) -->
+      <div class="energy-block low" id="realEnergy" style="display:none;">
         <div class="energy-icon-wrap">
           <span class="energy-icon" id="energyIcon">💤</span>
         </div>
         <div class="energy-info">
           <span class="energy-label">Energia da Dupla</span>
           <span class="energy-level" id="energyLevel">Baixa</span>
-          <span class="energy-hint" id="energyHint">Complete hábitos para energizar!</span>
+          <span class="energy-hint" id="energyHint">Carregando...</span>
         </div>
       </div>
+
     </div>
   </section>
 
   <!-- ==================== CONTEÚDO PRINCIPAL (SCROLLÁVEL) ==================== -->
   <main class="main-content" id="mainContent">
     <div class="main-inner">
+
       <!-- Filtro de Categoria -->
       <div class="filter-bar" id="filterBar">
         <button class="filter-chip active" data-filter="all">Todos</button>
@@ -86,19 +116,60 @@
         <button class="filter-chip" data-filter="brincadeira">🎾 Brincadeira</button>
       </div>
 
-      <!-- Lista de Hábitos -->
-      <div class="habits-list" id="habitsList">
+      <!-- SKELETON: Lista de Hábitos (mostrado enquanto carrega) -->
+      <div class="habits-list skeleton-active" id="skeletonHabitsList">
+        <div class="habit-card-skeleton">
+          <div class="skeleton skeleton-circle" style="width:44px; height:44px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+            <div class="skeleton skeleton-text" style="width:70%; height:16px;"></div>
+            <div class="skeleton skeleton-text" style="width:40%; height:12px;"></div>
+          </div>
+          <div class="skeleton skeleton-circle" style="width:48px; height:48px; flex-shrink:0;"></div>
+        </div>
+        <div class="habit-card-skeleton">
+          <div class="skeleton skeleton-circle" style="width:44px; height:44px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+            <div class="skeleton skeleton-text" style="width:60%; height:16px;"></div>
+            <div class="skeleton skeleton-text" style="width:50%; height:12px;"></div>
+          </div>
+          <div class="skeleton skeleton-circle" style="width:48px; height:48px; flex-shrink:0;"></div>
+        </div>
+        <div class="habit-card-skeleton">
+          <div class="skeleton skeleton-circle" style="width:44px; height:44px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+            <div class="skeleton skeleton-text" style="width:80%; height:16px;"></div>
+            <div class="skeleton skeleton-text" style="width:35%; height:12px;"></div>
+          </div>
+          <div class="skeleton skeleton-circle" style="width:48px; height:48px; flex-shrink:0;"></div>
+        </div>
+        <div class="habit-card-skeleton">
+          <div class="skeleton skeleton-circle" style="width:44px; height:44px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+            <div class="skeleton skeleton-text" style="width:55%; height:16px;"></div>
+            <div class="skeleton skeleton-text" style="width:45%; height:12px;"></div>
+          </div>
+          <div class="skeleton skeleton-circle" style="width:48px; height:48px; flex-shrink:0;"></div>
+        </div>
+        <div class="habit-card-skeleton">
+          <div class="skeleton skeleton-circle" style="width:44px; height:44px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+            <div class="skeleton skeleton-text" style="width:65%; height:16px;"></div>
+            <div class="skeleton skeleton-text" style="width:30%; height:12px;"></div>
+          </div>
+          <div class="skeleton skeleton-circle" style="width:48px; height:48px; flex-shrink:0;"></div>
+        </div>
+      </div>
+
+      <!-- REAL: Lista de Hábitos (escondido inicialmente) -->
+      <div class="habits-list" id="habitsList" style="display:none;">
         <!-- Inserido via JS -->
       </div>
 
-      <!-- Espaço de scroll para não ficar atrás da nav inferior -->
       <div class="scroll-spacer"></div>
     </div>
   </main>
 
-  <!-- ==================== ÁREA INFERIOR (THUMB ZONE) — INTERAÇÃO PRINCIPAL ==================== -->
-
-  <!-- Barra de Ação Rápida (acima da navegação) -->
+  <!-- ==================== ÁREA INFERIOR (THUMB ZONE) ==================== -->
   <div class="quick-actions" id="quickActions">
     <button class="quick-btn" id="btnSyncNow" aria-label="Sincronizar agora">
       <span class="quick-icon">⚡</span>
@@ -110,7 +181,6 @@
     </button>
   </div>
 
-  <!-- Navegação Inferior Fixa (Thumb Zone) -->
   <nav class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-tab="today" aria-label="Hoje">
       <span class="nav-icon">📅</span>
@@ -130,7 +200,7 @@
     </button>
   </nav>
 
-  <!-- ==================== MODAIS (THUMB-FRIENDLY — AÇÕES NA PARTE INFERIOR) ==================== -->
+  <!-- ==================== MODAIS ==================== -->
 
   <!-- Modal: Adicionar Hábito -->
   <div class="modal-overlay" id="modalAddHabit">
@@ -164,14 +234,13 @@
           <input type="time" id="habitTime" value="12:00">
         </div>
       </div>
-      <!-- Botão de ação na parte inferior do modal (Thumb Zone) -->
       <div class="modal-footer">
         <button class="btn-primary btn-full" id="saveHabitBtn">Salvar Hábito</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Sugestão de Exercício (aparece ao interagir com hábito) -->
+  <!-- Modal: Sugestão de Exercício -->
   <div class="modal-overlay" id="modalExercise">
     <div class="modal-sheet modal-exercise">
       <div class="modal-handle"></div>
@@ -206,7 +275,7 @@
       </div>
       <div class="modal-body">
         <div class="profile-card">
-          <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Pet" class="profile-avatar">
+          <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Pet" class="profile-avatar" id="profileAvatarImg">
           <div class="profile-info">
             <input type="text" id="petName" value="Rex" class="profile-input" placeholder="Nome do pet">
             <input type="text" id="tutorName" value="Tutor" class="profile-input" placeholder="Seu nome">
@@ -279,10 +348,10 @@
     </div>
   </div>
 
-  <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+  <!-- Toast Notifications -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- ==================== OFFLINE BANNER ==================== -->
+  <!-- Offline Banner -->
   <div class="offline-banner" id="offlineBanner">
     <span>📡 Sem conexão — seus dados estão salvos localmente</span>
   </div>

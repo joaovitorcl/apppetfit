@@ -1,6 +1,6 @@
 /* ============================================
    PETFIT SYNC — style.css
-   Mobile-First | Thumb-Friendly Zone | PWA
+   Mobile-First | Thumb-Friendly | Skeletons
    ============================================ */
 
 *, *::before, *::after {
@@ -11,12 +11,10 @@
 }
 
 :root {
-  /* Cores — tema warm e energético */
   --bg-body: #f8f6f1;
   --bg-card: #ffffff;
   --bg-input: #f3f0ea;
   --bg-overlay: rgba(31, 41, 55, 0.55);
-
   --primary: #f97316;
   --primary-dark: #ea580c;
   --primary-light: #ffedd5;
@@ -24,36 +22,30 @@
   --secondary-light: #d1fae5;
   --accent: #8b5cf6;
   --accent-light: #ede9fe;
-
   --text-primary: #1f2937;
   --text-secondary: #4b5563;
   --text-muted: #9ca3af;
   --text-inverse: #ffffff;
-
   --danger: #ef4444;
   --danger-light: #fee2e2;
   --warning: #f59e0b;
   --warning-light: #fef3c7;
-
-  /* Thumb-Friendly Dimensions */
+  --skeleton-base: #e5e7eb;
+  --skeleton-shine: #f3f4f6;
   --touch-min: 48px;
   --touch-comfy: 56px;
   --touch-large: 64px;
-
   --nav-height: 64px;
   --quick-actions-height: 56px;
   --header-height: 56px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-
-  /* Tipografia */
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-full: 9999px;
-
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
@@ -78,13 +70,71 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 
 /* ============================================
-   HEADER — TOP ZONE (INFORMAÇÃO ESTÁTICA)
+   SKELETON SCREENS ⭐
+   ============================================ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 25%,
+    var(--skeleton-shine) 50%,
+    var(--skeleton-base) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-circle {
+  border-radius: var(--radius-full);
+}
+
+.skeleton-bar {
+  border-radius: var(--radius-full);
+}
+
+.skeleton-text {
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Card Skeleton para lista de hábitos */
+.habit-card-skeleton {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.habit-card-skeleton:last-child {
+  margin-bottom: 0;
+}
+
+/* Fade entre skeleton e real */
+.fade-in {
+  animation: fadeInContent 0.4s ease forwards;
+}
+
+@keyframes fadeInContent {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   HEADER
    ============================================ */
 .app-header {
   position: sticky;
@@ -156,7 +206,7 @@ body {
 }
 
 /* ============================================
-   DASHBOARD PANEL — TOP ZONE
+   DASHBOARD PANEL
    ============================================ */
 .dashboard-panel {
   background: linear-gradient(180deg, #fff7ed 0%, var(--bg-body) 100%);
@@ -223,7 +273,7 @@ body {
   margin-top: 8px;
 }
 
-/* Energia da Dupla */
+/* Energia */
 .energy-block {
   display: flex;
   align-items: center;
@@ -298,7 +348,7 @@ body {
   height: 40px;
 }
 
-/* ===== Filtro de Categoria ===== */
+/* Filtro */
 .filter-bar {
   display: flex;
   gap: 8px;
@@ -338,7 +388,7 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-/* ===== Lista de Hábitos ===== */
+/* Lista de Hábitos */
 .habits-list {
   display: flex;
   flex-direction: column;
@@ -417,7 +467,7 @@ body {
   font-weight: 500;
 }
 
-/* ===== TOGGLE / CHECKBOX THUMB-FRIENDLY ===== */
+/* Toggle */
 .habit-toggle {
   width: var(--touch-large);
   height: var(--touch-large);
@@ -435,15 +485,6 @@ body {
 
 .habit-toggle:active { transform: scale(0.88); }
 
-.habit-toggle::after {
-  content: '';
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-full);
-  background: transparent;
-  transition: all 0.25s ease;
-}
-
 .habit-toggle.checked {
   background: var(--secondary);
   border-color: var(--secondary);
@@ -458,7 +499,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
 }
 
 .habit-delete {
@@ -480,7 +520,7 @@ body {
 .habit-delete:active { background: var(--danger-light); color: var(--danger); transform: scale(0.9); }
 
 /* ============================================
-   QUICK ACTIONS — THUMB ZONE (acima da nav)
+   QUICK ACTIONS — THUMB ZONE
    ============================================ */
 .quick-actions {
   position: fixed;
@@ -535,7 +575,7 @@ body {
 .quick-icon { font-size: 1.125rem; line-height: 1; }
 
 /* ============================================
-   BOTTOM NAVIGATION — THUMB ZONE ⭐
+   BOTTOM NAVIGATION
    ============================================ */
 .bottom-nav {
   position: fixed;
@@ -653,7 +693,7 @@ body {
 .btn-full { width: 100%; }
 
 /* ============================================
-   MODAIS — THUMB-FRIENDLY (ação na base)
+   MODAIS
    ============================================ */
 .modal-overlay {
   position: fixed;
@@ -737,7 +777,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ===== Formulários ===== */
+/* Formulários */
 .form-group {
   margin-bottom: 16px;
 }
@@ -776,7 +816,7 @@ body {
   color: var(--text-muted);
 }
 
-/* ===== Modal de Exercício ===== */
+/* Modal de Exercício */
 .modal-exercise { text-align: center; }
 
 .exercise-visual {
@@ -833,7 +873,7 @@ body {
   font-style: italic;
 }
 
-/* ===== Perfil ===== */
+/* Perfil */
 .profile-card {
   display: flex;
   align-items: center;
@@ -901,7 +941,7 @@ body {
   font-weight: 600;
 }
 
-/* ===== Stats / Evolução ===== */
+/* Stats / Evolução */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1059,31 +1099,12 @@ body {
    RESPONSIVE — Desktop
    ============================================ */
 @media (min-width: 768px) {
-  body {
-    background: #e8e6e1;
-  }
-
-  .app-header,
-  .dashboard-panel,
-  .main-content,
-  .quick-actions,
-  .bottom-nav {
-    max-width: 480px;
-  }
-
-  .modal-sheet {
-    border-radius: var(--radius-xl);
-    max-height: 640px;
-    padding-bottom: 20px;
-  }
-
-  .modal-overlay {
-    align-items: center;
-    padding: 24px;
-  }
+  body { background: #e8e6e1; }
+  .app-header, .dashboard-panel, .main-content, .quick-actions, .bottom-nav { max-width: 480px; }
+  .modal-sheet { border-radius: var(--radius-xl); max-height: 640px; padding-bottom: 20px; }
+  .modal-overlay { align-items: center; padding: 24px; }
 }
 
-/* Reduzir movimento (Acessibilidade) */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

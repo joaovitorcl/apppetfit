@@ -1,43 +1,181 @@
 /**
- * PETFIT SYNC — script.js
- * PWA de Gestão de Hábitos para Pets e Tutores
- * Thumb-Friendly | localStorage | Exercícios Dinâmicos
+ * ═══════════════════════════════════════════════════════════════
+ *  PETFIT SYNC — script.js
+ *  PWA de Gestão de Hábitos para Pets e Tutores
+ *  Features: Skeleton Screens | DataLayer (localStorage/Firebase)
+ *  ═══════════════════════════════════════════════════════════════
  */
 
-// ===== BANCO DE DADOS LOCAL (localStorage) =====
-const Storage = {
-  keys: {
-    habits: 'petfit_habits',
-    profile: 'petfit_profile',
-    history: 'petfit_history',
-    exercises: 'petfit_exercises',
-    lastDate: 'petfit_lastDate'
-  },
-
-  get(key, defaultValue = null) {
-    try {
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : defaultValue;
-    } catch {
-      return defaultValue;
-    }
-  },
-
-  set(key, value) {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch {
-      return false;
-    }
-  },
-
-  remove(key) {
-    localStorage.removeItem(key);
-  }
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 1: CONFIGURAÇÃO DO FIREBASE (DESCOMENTE PARA USAR)
+//  1. Crie um projeto em https://console.firebase.google.com
+//  2. Ative Firestore Database e Authentication (Anônimo)
+//  3. Copie as credenciais do seu projeto e substitua abaixo
+//  4. Descomente os scripts do Firebase no index.html
+// ═══════════════════════════════════════════════════════════════
+/*
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "seu-projeto.firebaseapp.com",
+  projectId: "seu-projeto",
+  storageBucket: "seu-projeto.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef123456"
 };
 
-// ===== SUGESTÕES DE EXERCÍCIOS POR CATEGORIA =====
+// Inicializar Firebase (descomente quando ativar)
+// firebase.initializeApp(firebaseConfig);
+// const db = firebase.firestore();
+// const auth = firebase.auth();
+*/
+
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 2: CAMADA DE DADOS (DATALAYER)
+//  Troque facilmente entre localStorage e Firebase
+//  Para usar Firebase: mude useFirebase = true
+// ═══════════════════════════════════════════════════════════════
+
+const CONFIG = {
+  useFirebase: false,        // ← MUDE PARA true PARA ATIVAR FIREBASE
+  firebaseCollection: 'habits',
+  firebaseUserDoc: 'user_data'
+};
+
+const DataLayer = {
+  // ─── localStorage Driver (padrão) ───
+  _local: {
+    keys: {
+      habits: 'petfit_habits',
+      profile: 'petfit_profile',
+      history: 'petfit_history',
+      exercises: 'petfit_exercises',
+      lastDate: 'petfit_lastDate'
+    },
+
+    async getAll() {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve({
+            habits: this._get(this.keys.habits, null),
+            profile: this._get(this.keys.profile, null),
+            history: this._get(this.keys.history, []),
+            exercises: this._get(this.keys.exercises, 0),
+            lastDate: this._get(this.keys.lastDate, '')
+          });
+        }, 600); // simula latência de rede para mostrar skeleton
+      });
+    },
+
+    async saveHabits(habits) {
+      this._set(this.keys.habits, habits);
+      return true;
+    },
+
+    async saveProfile(profile) {
+      this._set(this.keys.profile, profile);
+      return true;
+    },
+
+    async saveHistory(history) {
+      this._set(this.keys.history, history);
+      return true;
+    },
+
+    async saveExercises(count) {
+      this._set(this.keys.exercises, count);
+      return true;
+    },
+
+    async saveLastDate(date) {
+      this._set(this.keys.lastDate, date);
+      return true;
+    },
+
+    _get(key, defaultValue) {
+      try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : defaultValue;
+      } catch { return defaultValue; }
+    },
+
+    _set(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+      catch { return false; }
+    }
+  },
+
+  // ─── Firebase Driver (ative mudando useFirebase) ───
+  _firebase: {
+    async getAll() {
+      // Verifica se usuário está autenticado (anônimo)
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        await firebase.auth().signInAnonymously();
+      }
+      const uid = firebase.auth().currentUser.uid;
+      const docRef = db.collection('users').doc(uid);
+      const doc = await docRef.get();
+
+      if (doc.exists) {
+        const data = doc.data();
+        return {
+          habits: data.habits || null,
+          profile: data.profile || null,
+          history: data.history || [],
+          exercises: data.exercises || 0,
+          lastDate: data.lastDate || ''
+        };
+      }
+      return { habits: null, profile: null, history: [], exercises: 0, lastDate: '' };
+    },
+
+    async saveHabits(habits) {
+      const uid = firebase.auth().currentUser.uid;
+      await db.collection('users').doc(uid).update({ habits });
+      return true;
+    },
+
+    async saveProfile(profile) {
+      const uid = firebase.auth().currentUser.uid;
+      await db.collection('users').doc(uid).update({ profile });
+      return true;
+    },
+
+    async saveHistory(history) {
+      const uid = firebase.auth().currentUser.uid;
+      await db.collection('users').doc(uid).update({ history });
+      return true;
+    },
+
+    async saveExercises(count) {
+      const uid = firebase.auth().currentUser.uid;
+      await db.collection('users').doc(uid).update({ exercises: count });
+      return true;
+    },
+
+    async saveLastDate(date) {
+      const uid = firebase.auth().currentUser.uid;
+      await db.collection('users').doc(uid).update({ lastDate: date });
+      return true;
+    }
+  },
+
+  // ─── Interface pública ───
+  driver() {
+    return CONFIG.useFirebase ? this._firebase : this._local;
+  },
+
+  async getAll() { return this.driver().getAll(); },
+  async saveHabits(h) { return this.driver().saveHabits(h); },
+  async saveProfile(p) { return this.driver().saveProfile(p); },
+  async saveHistory(h) { return this.driver().saveHistory(h); },
+  async saveExercises(c) { return this.driver().saveExercises(c); },
+  async saveLastDate(d) { return this.driver().saveLastDate(d); }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 3: BANCO DE EXERCÍCIOS
+// ═══════════════════════════════════════════════════════════════
 const ExerciseDB = {
   alimentacao: [
     "Enquanto prepara a ração, faça 15 agachamentos",
@@ -99,7 +237,9 @@ const ExerciseDB = {
 
 const ExerciseEmojis = ['🏃', '🤸', '💪', '🧘', '⚡', '🔥', '🦵', '🏋️', '⛹️', '🤾'];
 
-// ===== HÁBITOS PADRÃO =====
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 4: HÁBITOS PADRÃO
+// ═══════════════════════════════════════════════════════════════
 const DefaultHabits = [
   { id: 'h1', title: 'Alimentação da manhã', category: 'alimentacao', time: '08:00', completed: false, icon: '🍖', createdAt: Date.now() },
   { id: 'h2', title: 'Passeio matinal', category: 'passeio', time: '09:00', completed: false, icon: '🦮', createdAt: Date.now() },
@@ -110,7 +250,47 @@ const DefaultHabits = [
   { id: 'h7', title: 'Passeio noturno', category: 'passeio', time: '20:00', completed: false, icon: '🌙', createdAt: Date.now() }
 ];
 
-// ===== ESTADO DA APLICAÇÃO =====
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 5: GERENCIADOR DE SKELETON SCREENS
+// ═══════════════════════════════════════════════════════════════
+const SkeletonManager = {
+  show() {
+    // Mostra skeletons, esconde conteúdo real
+    document.getElementById('skeletonProgress').style.display = 'block';
+    document.getElementById('realProgress').style.display = 'none';
+    document.getElementById('skeletonEnergy').style.display = 'flex';
+    document.getElementById('realEnergy').style.display = 'none';
+    document.getElementById('skeletonHabitsList').style.display = 'flex';
+    document.getElementById('habitsList').style.display = 'none';
+  },
+
+  hide() {
+    // Esconde skeletons, mostra conteúdo real com fade
+    const skeletons = [
+      'skeletonProgress', 'skeletonEnergy', 'skeletonHabitsList'
+    ];
+    const reals = [
+      'realProgress', 'realEnergy', 'habitsList'
+    ];
+
+    skeletons.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    reals.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.display = id === 'realEnergy' ? 'flex' : 'block';
+        el.classList.add('fade-in');
+      }
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 6: APLICAÇÃO PRINCIPAL
+// ═══════════════════════════════════════════════════════════════
 const App = {
   habits: [],
   profile: { petName: 'Rex', tutorName: 'Tutor', avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf' },
@@ -119,60 +299,69 @@ const App = {
   currentFilter: 'all',
   pendingHabitId: null,
   pendingHabitAction: null,
+  isLoading: false,
 
-  // Inicialização
-  init() {
-    this.checkDayReset();
-    this.loadData();
+  async init() {
+    SkeletonManager.show();
     this.setupEventListeners();
     this.setupServiceWorker();
     this.checkOnlineStatus();
+
+    // Carrega dados com delay simulado (para skeleton aparecer)
+    await this.loadData();
+    await this.checkDayReset();
+
+    SkeletonManager.hide();
     this.renderAll();
   },
 
-  // Verifica se é um novo dia e reseta hábitos
-  checkDayReset() {
-    const lastDate = Storage.get(Storage.keys.lastDate, '');
+  async loadData() {
+    this.isLoading = true;
+    const data = await DataLayer.getAll();
+
+    this.habits = data.habits || DefaultHabits;
+    this.profile = data.profile || this.profile;
+    this.history = data.history || [];
+    this.exercisesDone = data.exercises || 0;
+    this.isLoading = false;
+  },
+
+  async checkDayReset() {
+    const data = await DataLayer.getAll();
+    const lastDate = data.lastDate || '';
     const today = new Date().toISOString().split('T')[0];
 
     if (lastDate !== today) {
-      // Salvar histórico do dia anterior
       if (lastDate) {
-        const prevHabits = Storage.get(Storage.keys.habits, []);
+        const prevHabits = this.habits;
         const completedCount = prevHabits.filter(h => h.completed).length;
         const totalCount = prevHabits.length;
         const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-        let history = Storage.get(Storage.keys.history, []);
+        let history = this.history;
         history.push({ date: lastDate, completed: completedCount, total: totalCount, percentage });
         if (history.length > 30) history = history.slice(-30);
-        Storage.set(Storage.keys.history, history);
+        this.history = history;
+        await DataLayer.saveHistory(history);
       }
 
-      // Resetar hábitos para o novo dia
-      let habits = Storage.get(Storage.keys.habits, DefaultHabits);
-      habits = habits.map(h => ({ ...h, completed: false }));
-      Storage.set(Storage.keys.habits, habits);
-      Storage.set(Storage.keys.lastDate, today);
+      this.habits = this.habits.map(h => ({ ...h, completed: false }));
+      await DataLayer.saveHabits(this.habits);
+      await DataLayer.saveLastDate(today);
     }
   },
 
-  loadData() {
-    this.habits = Storage.get(Storage.keys.habits, DefaultHabits);
-    this.profile = Storage.get(Storage.keys.profile, this.profile);
-    this.history = Storage.get(Storage.keys.history, []);
-    this.exercisesDone = Storage.get(Storage.keys.exercises, 0);
+  async saveHabits() {
+    await DataLayer.saveHabits(this.habits);
   },
 
-  saveHabits() {
-    Storage.set(Storage.keys.habits, this.habits);
+  async saveProfile() {
+    await DataLayer.saveProfile(this.profile);
   },
 
-  saveProfile() {
-    Storage.set(Storage.keys.profile, this.profile);
-  },
-
-  // ===== RENDERIZAÇÃO =====
+  // ═══════════════════════════════════════════════════════════════
+  //  RENDERIZAÇÃO
+  // ═══════════════════════════════════════════════════════════════
   renderAll() {
     this.renderHeader();
     this.renderDashboard();
@@ -181,7 +370,7 @@ const App = {
   },
 
   renderHeader() {
-    const avatarImg = document.querySelector('.header-avatar');
+    const avatarImg = document.getElementById('headerAvatarImg');
     if (avatarImg) avatarImg.src = this.profile.avatar;
   },
 
@@ -190,7 +379,6 @@ const App = {
     const completed = this.habits.filter(h => h.completed).length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    // Progresso
     document.getElementById('progressValue').textContent = percentage + '%';
     document.getElementById('progressFill').style.width = percentage + '%';
 
@@ -204,8 +392,7 @@ const App = {
     const subIndex = Math.min(Math.floor(percentage / 25), 4);
     document.getElementById('progressSub').textContent = subTexts[subIndex];
 
-    // Energia da Dupla
-    const energyBlock = document.getElementById('energyBlock');
+    const energyBlock = document.getElementById('realEnergy');
     const energyIcon = document.getElementById('energyIcon');
     const energyLevel = document.getElementById('energyLevel');
     const energyHint = document.getElementById('energyHint');
@@ -255,7 +442,6 @@ const App = {
       return;
     }
 
-    // Ordenar: pendentes primeiro, depois por horário
     const sorted = [...filtered].sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
       return (a.time || '00:00').localeCompare(b.time || '00:00');
@@ -268,11 +454,11 @@ const App = {
           <span class="habit-title">${this.escapeHtml(habit.title)}</span>
           <span class="habit-meta">${this.getCategoryLabel(habit.category)} · ${habit.time || '--:--'}</span>
         </div>
-        <button class="habit-toggle ${habit.completed ? 'checked' : ''}" 
+        <button class="habit-toggle ${habit.completed ? 'checked' : ''}"
                 onclick="App.toggleHabit('${habit.id}')"
                 aria-label="${habit.completed ? 'Desmarcar' : 'Concluir'} ${this.escapeHtml(habit.title)}">
         </button>
-        <button class="habit-delete" 
+        <button class="habit-delete"
                 onclick="App.deleteHabit('${habit.id}')"
                 aria-label="Excluir ${this.escapeHtml(habit.title)}">
           🗑️
@@ -283,13 +469,8 @@ const App = {
 
   getCategoryLabel(cat) {
     const labels = {
-      alimentacao: 'Alimentação',
-      passeio: 'Passeio',
-      medicacao: 'Medicação',
-      escovacao: 'Escovação',
-      brincadeira: 'Brincadeira',
-      higiene: 'Higiene',
-      outro: 'Outro'
+      alimentacao: 'Alimentação', passeio: 'Passeio', medicacao: 'Medicação',
+      escovacao: 'Escovação', brincadeira: 'Brincadeira', higiene: 'Higiene', outro: 'Outro'
     };
     return labels[cat] || 'Outro';
   },
@@ -300,34 +481,34 @@ const App = {
     return div.innerHTML;
   },
 
-  // ===== AÇÕES DE HÁBITO =====
-  toggleHabit(id) {
+  // ═══════════════════════════════════════════════════════════════
+  //  AÇÕES DE HÁBITO
+  // ═══════════════════════════════════════════════════════════════
+  async toggleHabit(id) {
     const habit = this.habits.find(h => h.id === id);
     if (!habit) return;
 
-    // Se está marcando como concluído (não desmarcando), mostrar exercício primeiro
     if (!habit.completed) {
       this.pendingHabitId = id;
       this.pendingHabitAction = 'complete';
       this.showExerciseModal(habit);
     } else {
-      // Desmarcar diretamente
       habit.completed = false;
-      this.saveHabits();
+      await this.saveHabits();
       this.renderAll();
       this.showToast('🔄 Hábito desmarcado', 'info');
     }
   },
 
-  deleteHabit(id) {
+  async deleteHabit(id) {
     if (!confirm('Tem certeza que deseja excluir este hábito?')) return;
     this.habits = this.habits.filter(h => h.id !== id);
-    this.saveHabits();
+    await this.saveHabits();
     this.renderAll();
     this.showToast('🗑️ Hábito removido', 'info');
   },
 
-  addHabit() {
+  async addHabit() {
     const title = document.getElementById('habitTitle').value.trim();
     const category = document.getElementById('habitCategory').value;
     const time = document.getElementById('habitTime').value;
@@ -353,12 +534,11 @@ const App = {
     };
 
     this.habits.push(newHabit);
-    this.saveHabits();
+    await this.saveHabits();
     this.closeModal('modalAddHabit');
     this.renderAll();
     this.showToast('🎉 Hábito adicionado! Que tal um exercício?', 'success');
 
-    // Mostrar sugestão de exercício ao adicionar
     setTimeout(() => {
       this.pendingHabitId = newHabit.id;
       this.pendingHabitAction = 'complete';
@@ -366,7 +546,9 @@ const App = {
     }, 400);
   },
 
-  // ===== EXERCÍCIOS =====
+  // ═══════════════════════════════════════════════════════════════
+  //  EXERCÍCIOS
+  // ═══════════════════════════════════════════════════════════════
   getRandomExercise(category) {
     const list = ExerciseDB[category] || ExerciseDB.outro;
     return list[Math.floor(Math.random() * list.length)];
@@ -382,24 +564,23 @@ const App = {
 
     document.getElementById('exerciseEmoji').textContent = emoji;
     document.getElementById('exerciseTitle').textContent = 'Hora de se mexer, ' + this.profile.tutorName + '!';
-    document.getElementById('exerciseText').textContent = 
+    document.getElementById('exerciseText').textContent =
       'Você está prestes a completar "' + habit.title + '" com ' + this.profile.petName + '.';
     document.getElementById('exerciseSuggestion').textContent = suggestion;
 
     this.openModal('modalExercise');
   },
 
-  completeExerciseAndHabit() {
+  async completeExerciseAndHabit() {
     if (this.pendingHabitId) {
       const habit = this.habits.find(h => h.id === this.pendingHabitId);
       if (habit) {
         habit.completed = true;
         this.exercisesDone++;
-        Storage.set(Storage.keys.exercises, this.exercisesDone);
-        this.saveHabits();
+        await DataLayer.saveExercises(this.exercisesDone);
+        await this.saveHabits();
         this.renderAll();
         this.showToast('🔥 Hábito + Exercício concluídos! Dupla sincronizada!', 'success');
-
         if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
       }
     }
@@ -414,14 +595,14 @@ const App = {
     this.closeModal('modalExercise');
   },
 
-  // ===== MODAIS =====
+  // ═══════════════════════════════════════════════════════════════
+  //  MODAIS
+  // ═══════════════════════════════════════════════════════════════
   openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
-
-    // Focar no primeiro input se houver
     const firstInput = modal.querySelector('input, select, textarea');
     if (firstInput) setTimeout(() => firstInput.focus(), 300);
   },
@@ -431,16 +612,17 @@ const App = {
     if (!modal) return;
     modal.classList.remove('active');
     document.body.style.overflow = '';
-
-    // Limpar formulários
     const titleInput = modal.querySelector('#habitTitle');
     if (titleInput) titleInput.value = '';
   },
 
-  // ===== PERFIL =====
-  openProfile() {
+  // ═══════════════════════════════════════════════════════════════
+  //  PERFIL
+  // ═══════════════════════════════════════════════════════════════
+  async openProfile() {
     document.getElementById('petName').value = this.profile.petName;
     document.getElementById('tutorName').value = this.profile.tutorName;
+    document.getElementById('profileAvatarImg').src = this.profile.avatar;
 
     const total = this.habits.length;
     const done = this.habits.filter(h => h.completed).length;
@@ -451,7 +633,7 @@ const App = {
     this.openModal('modalProfile');
   },
 
-  saveProfile() {
+  async saveProfile() {
     const petName = document.getElementById('petName').value.trim() || 'Rex';
     const tutorName = document.getElementById('tutorName').value.trim() || 'Tutor';
 
@@ -459,14 +641,16 @@ const App = {
     this.profile.tutorName = tutorName;
     this.profile.avatar = 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=' + encodeURIComponent(petName) + '&backgroundColor=ffdfbf';
 
-    this.saveProfile();
+    await this.saveProfile();
     this.renderHeader();
     this.closeModal('modalProfile');
     this.showToast('🐾 Perfil atualizado!', 'success');
   },
 
-  // ===== ESTATÍSTICAS / EVOLUÇÃO =====
-  openStats() {
+  // ═══════════════════════════════════════════════════════════════
+  //  ESTATÍSTICAS
+  // ═══════════════════════════════════════════════════════════════
+  async openStats() {
     const total = this.habits.length;
     const done = this.habits.filter(h => h.completed).length;
     const percentage = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -483,8 +667,6 @@ const App = {
   renderHistoryBars() {
     const container = document.getElementById('historyBars');
     const history = this.history.slice(-7);
-
-    // Preencher com dados fictícios se não tiver 7 dias
     const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const todayIdx = new Date().getDay();
 
@@ -523,14 +705,15 @@ const App = {
       if (this.history[i].percentage >= 50) streak++;
       else break;
     }
-    // Verificar se hoje conta
     const todayDone = this.habits.filter(h => h.completed).length;
     const todayTotal = this.habits.length;
     if (todayTotal > 0 && (todayDone / todayTotal) >= 0.5) streak++;
     return streak;
   },
 
-  // ===== NAVEGAÇÃO =====
+  // ═══════════════════════════════════════════════════════════════
+  //  NAVEGAÇÃO
+  // ═══════════════════════════════════════════════════════════════
   switchTab(tabName) {
     document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.toggle('active', item.dataset.tab === tabName);
@@ -544,7 +727,6 @@ const App = {
       this.showToast('⚙️ Configurações em breve!', 'info');
     }
 
-    // Sempre volta para 'today' visualmente após abrir modal
     if (tabName !== 'today') {
       setTimeout(() => {
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -554,7 +736,9 @@ const App = {
     }
   },
 
-  // ===== TOASTS =====
+  // ═══════════════════════════════════════════════════════════════
+  //  TOASTS
+  // ═══════════════════════════════════════════════════════════════
   showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -564,15 +748,19 @@ const App = {
     setTimeout(() => toast.remove(), 3000);
   },
 
-  // ===== EVENT LISTENERS =====
+  // ═══════════════════════════════════════════════════════════════
+  //  EVENT LISTENERS
+  // ═══════════════════════════════════════════════════════════════
   setupEventListeners() {
-    // Botão de perfil no header
     document.getElementById('btnProfile').addEventListener('click', () => this.openProfile());
 
-    // Quick Actions (Thumb Zone)
-    document.getElementById('btnSyncNow').addEventListener('click', () => {
-      this.showToast('⚡ Sincronizando dados...', 'success');
+    document.getElementById('btnSyncNow').addEventListener('click', async () => {
+      SkeletonManager.show();
+      await this.loadData();
+      await this.checkDayReset();
+      SkeletonManager.hide();
       this.renderAll();
+      this.showToast('⚡ Dados sincronizados!', 'success');
       if (navigator.vibrate) navigator.vibrate(20);
     });
 
@@ -581,24 +769,20 @@ const App = {
       if (navigator.vibrate) navigator.vibrate(15);
     });
 
-    // Fechar modais
     document.getElementById('closeAddHabit').addEventListener('click', () => this.closeModal('modalAddHabit'));
     document.getElementById('closeProfile').addEventListener('click', () => this.closeModal('modalProfile'));
     document.getElementById('closeStats').addEventListener('click', () => this.closeModal('modalStats'));
     document.getElementById('closeStatsBtn').addEventListener('click', () => this.closeModal('modalStats'));
 
-    // Ações dos modais
     document.getElementById('saveHabitBtn').addEventListener('click', () => this.addHabit());
     document.getElementById('saveProfileBtn').addEventListener('click', () => this.saveProfile());
     document.getElementById('dismissExercise').addEventListener('click', () => this.dismissExercise());
     document.getElementById('doneExercise').addEventListener('click', () => this.completeExerciseAndHabit());
 
-    // Navegação inferior
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', () => this.switchTab(item.dataset.tab));
     });
 
-    // Filtros de categoria
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
@@ -608,7 +792,6 @@ const App = {
       });
     });
 
-    // Fechar modal ao clicar no overlay
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
@@ -619,7 +802,6 @@ const App = {
       });
     });
 
-    // Tecla Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.active').forEach(modal => {
@@ -627,13 +809,11 @@ const App = {
           else this.closeModal(modal.id);
         });
       }
-      // Enter no input de título do hábito
       if (e.key === 'Enter' && document.activeElement.id === 'habitTitle') {
         this.addHabit();
       }
     });
 
-    // Swipe para fechar modal (gesto natural mobile)
     let touchStartY = 0;
     document.querySelectorAll('.modal-sheet').forEach(sheet => {
       sheet.addEventListener('touchstart', (e) => {
@@ -654,12 +834,14 @@ const App = {
     });
   },
 
-  // ===== SERVICE WORKER (Inline via Blob) =====
+  // ═══════════════════════════════════════════════════════════════
+  //  SERVICE WORKER
+  // ═══════════════════════════════════════════════════════════════
   setupServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
 
     const swCode = `
-      const CACHE_NAME = 'petfit-sync-v1';
+      const CACHE_NAME = 'petfit-sync-v2';
       const STATIC_ASSETS = [
         '/',
         '/index.html',
@@ -678,7 +860,7 @@ const App = {
 
       self.addEventListener('activate', (e) => {
         e.waitUntil(
-          caches.keys().then(keys => 
+          caches.keys().then(keys =>
             Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
           ).then(() => self.clients.claim())
         );
@@ -705,11 +887,13 @@ const App = {
     const swUrl = URL.createObjectURL(blob);
 
     navigator.serviceWorker.register(swUrl)
-      .then(reg => console.log('[PetFit] Service Worker registrado'))
+      .then(() => console.log('[PetFit] Service Worker registrado'))
       .catch(err => console.log('[PetFit] Erro no SW:', err));
   },
 
-  // ===== STATUS ONLINE/OFFLINE =====
+  // ═══════════════════════════════════════════════════════════════
+  //  STATUS ONLINE/OFFLINE
+  // ═══════════════════════════════════════════════════════════════
   checkOnlineStatus() {
     const banner = document.getElementById('offlineBanner');
 
@@ -734,7 +918,9 @@ const App = {
   }
 };
 
-// ===== INICIALIZAR =====
+// ═══════════════════════════════════════════════════════════════
+//  INICIALIZAR
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 });
