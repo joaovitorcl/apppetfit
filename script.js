@@ -1,8 +1,8 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- *  PETFIT SYNC v3.0 — script.js
+ *  PETFIT SYNC v4.0 — script.js
  *  PWA de Gestão de Hábitos para Pets e Tutores
- *  Features: Skeletons | DataLayer | Gestures (Pull, Swipe, Long-Press)
+ *  Features: Skeletons | DataLayer | Gestures | Microinterações Progressivas
  *  ═══════════════════════════════════════════════════════════════
  */
 
@@ -33,7 +33,8 @@ const DataLayer = {
     keys: {
       habits: 'petfit_habits', profile: 'petfit_profile',
       history: 'petfit_history', exercises: 'petfit_exercises',
-      lastDate: 'petfit_lastDate', gestureHint: 'petfit_gestureHint'
+      lastDate: 'petfit_lastDate', gestureHint: 'petfit_gestureHint',
+      highFiveHint: 'petfit_highFiveHint'
     },
     async getAll() {
       return new Promise(resolve => {
@@ -44,7 +45,8 @@ const DataLayer = {
             history: this._get(this.keys.history, []),
             exercises: this._get(this.keys.exercises, 0),
             lastDate: this._get(this.keys.lastDate, ''),
-            gestureHint: this._get(this.keys.gestureHint, false)
+            gestureHint: this._get(this.keys.gestureHint, false),
+            highFiveHint: this._get(this.keys.highFiveHint, false)
           });
         }, 700);
       });
@@ -55,6 +57,7 @@ const DataLayer = {
     async saveExercises(c) { this._set(this.keys.exercises, c); return true; },
     async saveLastDate(d) { this._set(this.keys.lastDate, d); return true; },
     async saveGestureHint(s) { this._set(this.keys.gestureHint, s); return true; },
+    async saveHighFiveHint(s) { this._set(this.keys.highFiveHint, s); return true; },
     _get(key, def) { try { const d = localStorage.getItem(key); return d ? JSON.parse(d) : def; } catch { return def; } },
     _set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch { return false; } }
   },
@@ -67,16 +70,17 @@ const DataLayer = {
       const doc = await db.collection('users').doc(uid).get();
       if (doc.exists) {
         const data = doc.data();
-        return { habits: data.habits || null, profile: data.profile || null, history: data.history || [], exercises: data.exercises || 0, lastDate: data.lastDate || '', gestureHint: data.gestureHint || false };
+        return { habits: data.habits || null, profile: data.profile || null, history: data.history || [], exercises: data.exercises || 0, lastDate: data.lastDate || '', gestureHint: data.gestureHint || false, highFiveHint: data.highFiveHint || false };
       }
-      return { habits: null, profile: null, history: [], exercises: 0, lastDate: '', gestureHint: false };
+      return { habits: null, profile: null, history: [], exercises: 0, lastDate: '', gestureHint: false, highFiveHint: false };
     },
     async saveHabits(h) { const uid = firebase.auth().currentUser.uid; await db.collection('users').doc(uid).update({ habits: h }); return true; },
     async saveProfile(p) { const uid = firebase.auth().currentUser.uid; await db.collection('users').doc(uid).update({ profile: p }); return true; },
     async saveHistory(h) { const uid = firebase.auth().currentUser.uid; await db.collection('users').doc(uid).update({ history: h }); return true; },
     async saveExercises(c) { const uid = firebase.auth().currentUser.uid; await db.collection('users').doc(uid).update({ exercises: c }); return true; },
     async saveLastDate(d) { const uid = firebase.auth().currentUser.uid; await db.collection('users').doc(uid).update({ lastDate: d }); return true; },
-    async saveGestureHint(s) { const uid = firebase.auth().currentUser.uid; await db.collection('users').doc(uid).update({ gestureHint: s }); return true; }
+    async saveGestureHint(s) { const uid = firebase.auth().currentUser.uid; await db.collection('users').doc(uid).update({ gestureHint: s }); return true; },
+    async saveHighFiveHint(s) { const uid = firebase.auth().currentUser.uid; await db.collection('users').doc(uid).update({ highFiveHint: s }); return true; }
   },
 
   driver() { return CONFIG.useFirebase ? this._firebase : this._local; },
@@ -86,7 +90,8 @@ const DataLayer = {
   async saveHistory(h) { return this.driver().saveHistory(h); },
   async saveExercises(c) { return this.driver().saveExercises(c); },
   async saveLastDate(d) { return this.driver().saveLastDate(d); },
-  async saveGestureHint(s) { return this.driver().saveGestureHint(s); }
+  async saveGestureHint(s) { return this.driver().saveGestureHint(s); },
+  async saveHighFiveHint(s) { return this.driver().saveHighFiveHint(s); }
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -124,6 +129,7 @@ const SkeletonManager = {
     document.getElementById('realEnergy').style.display = 'none';
     document.getElementById('skeletonHabitsList').style.display = 'flex';
     document.getElementById('habitsList').style.display = 'none';
+    document.getElementById('weeklyTrailBlock').style.display = 'none';
   },
   hide() {
     ['skeletonProgress','skeletonEnergy','skeletonHabitsList'].forEach(id => {
@@ -133,11 +139,13 @@ const SkeletonManager = {
       const el = document.getElementById(id);
       if(el) { el.style.display = id==='realEnergy'?'flex':'block'; el.classList.add('fade-in'); }
     });
+    const trail = document.getElementById('weeklyTrailBlock');
+    if(trail) { trail.style.display = 'block'; trail.classList.add('visible'); }
   }
 };
 
 // ═══════════════════════════════════════════════════════════════
-//  SEÇÃO 5: GESTURE ENGINE ⭐
+//  SEÇÃO 5: GESTURE ENGINE
 // ═══════════════════════════════════════════════════════════════
 const GestureEngine = {
   ptr: {
@@ -222,7 +230,7 @@ const GestureEngine = {
           const habit = App.habits.find(h=>h.id===habitId);
           if(habit && !habit.completed) {
             App.pendingHabitId = habitId; App.pendingHabitAction = 'complete';
-            App.showExerciseModal(habit);
+            App.showHighFiveModal(habit);
           } else if(habit && habit.completed) {
             App.showToast('✅ Hábito já concluído!', 'info');
           }
@@ -271,7 +279,7 @@ const GestureEngine = {
       this.menu.style.top = Math.min(y, window.innerHeight-150)+'px';
       const isCompleted = habit.completed;
       this.menu.innerHTML = `
-        <button class="long-press-menu-item" onclick="GestureEngine.longPress.action('toggle','${habitId}')">${isCompleted?'↩️ Desmarcar':'✅ Concluir'}</button>
+        <button class="long-press-menu-item" onclick="GestureEngine.longPress.action('toggle','${habitId}')">${isCompleted?'↩️ Desmarcar':'🐾 High-Five'}</button>
         <button class="long-press-menu-item" onclick="GestureEngine.longPress.action('exercise','${habitId}')">💪 Ver exercício</button>
         <button class="long-press-menu-item" onclick="GestureEngine.longPress.action('edit','${habitId}')">✏️ Editar</button>
         <button class="long-press-menu-item danger" onclick="GestureEngine.longPress.action('delete','${habitId}')">🗑️ Excluir</button>
@@ -297,11 +305,270 @@ const GestureEngine = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-//  SEÇÃO 6: APLICAÇÃO PRINCIPAL
+//  SEÇÃO 6: HIGH-FIVE ENGINE v4
+// ═══════════════════════════════════════════════════════════════
+const HighFiveEngine = {
+  progress: 0, interval: null, completed: false, circumference: 0,
+
+  init() {
+    const circle = document.getElementById('hfProgressCircle');
+    if(circle) {
+      const r = 64;
+      this.circumference = 2 * Math.PI * r;
+      circle.style.strokeDasharray = `${this.circumference} ${this.circumference}`;
+      circle.style.strokeDashoffset = this.circumference;
+    }
+    this.bindEvents();
+  },
+
+  bindEvents() {
+    const btn = document.getElementById('hfHoldBtn');
+    if(!btn) return;
+
+    const startEvents = ['mousedown', 'touchstart'];
+    const endEvents = ['mouseup', 'mouseleave', 'touchend', 'touchcancel'];
+
+    startEvents.forEach(evt => {
+      btn.addEventListener(evt, (e) => {
+        e.preventDefault();
+        if(this.completed) { this.reset(); return; }
+        this.start();
+      }, {passive: false});
+    });
+
+    endEvents.forEach(evt => {
+      btn.addEventListener(evt, (e) => {
+        if(!this.completed) this.reset();
+      });
+    });
+
+    document.getElementById('dismissHighFive')?.addEventListener('click', () => {
+      App.closeModal('modalHighFive');
+      this.reset();
+    });
+  },
+
+  start() {
+    if(this.completed) return;
+    const circle = document.getElementById('hfProgressCircle');
+    const petAvatar = document.getElementById('hfAvatarPet');
+    const tutorAvatar = document.getElementById('hfAvatarTutor');
+    const hapticBars = document.querySelectorAll('.haptic-bar');
+
+    this.interval = setInterval(() => {
+      this.progress += 2.5;
+      const offset = this.circumference - (this.progress / 100) * this.circumference;
+      if(circle) circle.style.strokeDashoffset = offset;
+
+      // Avatars move closer
+      const movePct = Math.min(this.progress / 100, 1);
+      if(petAvatar) petAvatar.style.transform = `translateX(${movePct * 32}px) scale(${1 + movePct * 0.15})`;
+      if(tutorAvatar) tutorAvatar.style.transform = `translateX(${-movePct * 32}px) scale(${1 + movePct * 0.15})`;
+
+      // Haptic bars visual feedback
+      const activeBars = Math.floor((this.progress / 100) * 5);
+      hapticBars.forEach((bar, i) => {
+        bar.classList.toggle('active', i < activeBars);
+      });
+
+      // Actual haptic feedback
+      if(this.progress % 20 === 0 && navigator.vibrate) {
+        navigator.vibrate(10 + (this.progress / 5));
+      }
+
+      if(this.progress >= 100) {
+        this.complete();
+      }
+    }, 30);
+  },
+
+  complete() {
+    clearInterval(this.interval);
+    this.completed = true;
+
+    const btn = document.getElementById('hfHoldBtn');
+    const btnIcon = document.getElementById('hfBtnIcon');
+    const btnLabel = document.getElementById('hfBtnLabel');
+    const spark = document.getElementById('highfiveSpark');
+    const petAvatar = document.getElementById('hfAvatarPet');
+    const tutorAvatar = document.getElementById('hfAvatarTutor');
+
+    if(btn) btn.classList.add('complete');
+    if(btnIcon) btnIcon.style.display = 'none';
+    if(btnLabel) btnLabel.style.display = 'block';
+    if(spark) spark.classList.add('show');
+    if(petAvatar) petAvatar.classList.add('highfiving');
+    if(tutorAvatar) tutorAvatar.classList.add('highfiving');
+
+    this.createConfetti();
+
+    // Strong haptic
+    if(navigator.vibrate) navigator.vibrate([30, 50, 30, 50, 50]);
+
+    // Complete the habit after animation
+    setTimeout(() => {
+      App.completeHighFiveHabit();
+    }, 1200);
+  },
+
+  createConfetti() {
+    const container = document.getElementById('hfConfettiArea');
+    if(!container) return;
+    const particles = ['🐾', '✨', '⭐', '🎉', '🔥', '💫', '🌟', '⚡'];
+
+    for(let i = 0; i < 16; i++) {
+      const p = document.createElement('span');
+      p.className = 'hf-particle';
+      p.textContent = particles[Math.floor(Math.random() * particles.length)];
+      container.appendChild(p);
+
+      const angle = (i / 16) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+      const dist = 50 + Math.random() * 60;
+      const rot = Math.random() * 360;
+
+      requestAnimationFrame(() => {
+        p.style.transition = 'all 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        p.style.opacity = '1';
+        p.style.transform = `translate(-50%, -50%) translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) rotate(${rot}deg) scale(${0.6 + Math.random() * 0.8})`;
+      });
+
+      setTimeout(() => {
+        p.style.opacity = '0';
+        p.style.transform += ' scale(0)';
+      }, 500);
+      setTimeout(() => p.remove(), 1000);
+    }
+  },
+
+  reset() {
+    clearInterval(this.interval);
+    this.progress = 0;
+    this.completed = false;
+
+    const circle = document.getElementById('hfProgressCircle');
+    const btn = document.getElementById('hfHoldBtn');
+    const btnIcon = document.getElementById('hfBtnIcon');
+    const btnLabel = document.getElementById('hfBtnLabel');
+    const spark = document.getElementById('highfiveSpark');
+    const petAvatar = document.getElementById('hfAvatarPet');
+    const tutorAvatar = document.getElementById('hfAvatarTutor');
+    const hapticBars = document.querySelectorAll('.haptic-bar');
+
+    if(circle) circle.style.strokeDashoffset = this.circumference;
+    if(btn) btn.classList.remove('complete');
+    if(btnIcon) btnIcon.style.display = 'block';
+    if(btnLabel) btnLabel.style.display = 'none';
+    if(spark) spark.classList.remove('show');
+    if(petAvatar) { petAvatar.style.transform = ''; petAvatar.classList.remove('highfiving'); }
+    if(tutorAvatar) { tutorAvatar.style.transform = ''; tutorAvatar.classList.remove('highfiving'); }
+    hapticBars.forEach(bar => bar.classList.remove('active'));
+  },
+
+  setAvatars(petAvatar, tutorAvatar) {
+    const petImg = document.getElementById('hfPetImg');
+    const tutorImg = document.getElementById('hfTutorImg');
+    if(petImg) petImg.src = petAvatar;
+    if(tutorImg) tutorImg.src = tutorAvatar;
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 7: WEEKLY TRAIL ENGINE v4
+// ═══════════════════════════════════════════════════════════════
+const WeeklyTrailEngine = {
+  init(containerId, isDetail = false) {
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML = '';
+
+    const width = container.offsetWidth || (isDetail ? 400 : 300);
+    const height = container.offsetHeight || (isDetail ? 80 : 70);
+    const segments = 7;
+    const segWidth = (width - (isDetail ? 40 : 30)) / segments;
+
+    for(let i = 0; i < segments; i++) {
+      const x = (isDetail ? 20 : 12) + i * segWidth;
+      const y = height / 2 + Math.sin(i * 0.9) * (isDetail ? 18 : 15);
+
+      const seg = document.createElement('div');
+      seg.className = 'trail-segment';
+      seg.style.left = x + 'px';
+      seg.style.top = y + 'px';
+      seg.style.width = (segWidth - 4) + 'px';
+      seg.id = `${containerId}-seg-${i}`;
+      container.appendChild(seg);
+
+      const fpHuman = document.createElement('span');
+      fpHuman.className = 'trail-footprint';
+      fpHuman.textContent = '👟';
+      fpHuman.style.left = (x + segWidth * 0.2) + 'px';
+      fpHuman.style.top = (y - 18) + 'px';
+      fpHuman.id = `${containerId}-fp-h-${i}`;
+      container.appendChild(fpHuman);
+
+      const fpPaw = document.createElement('span');
+      fpPaw.className = 'trail-footprint';
+      fpPaw.textContent = '🐾';
+      fpPaw.style.left = (x + segWidth * 0.55) + 'px';
+      fpPaw.style.top = (y + 6) + 'px';
+      fpPaw.id = `${containerId}-fp-p-${i}`;
+      container.appendChild(fpPaw);
+    }
+  },
+
+  stampDay(containerId, dayIndex, history, streak) {
+    const seg = document.getElementById(`${containerId}-seg-${dayIndex}`);
+    const fpH = document.getElementById(`${containerId}-fp-h-${dayIndex}`);
+    const fpP = document.getElementById(`${containerId}-fp-p-${dayIndex}`);
+
+    if(seg) seg.classList.add('active');
+    setTimeout(() => { if(fpH) fpH.classList.add('stamped'); }, 200);
+    setTimeout(() => { if(fpP) fpP.classList.add('stamped'); }, 400);
+
+    // Play stamp sound effect (visual only since we can't guarantee audio)
+    // Trophy shine if all 7 days
+    if(dayIndex === 6) {
+      const trophyId = containerId === 'trailPath' ? 'trailTrophy' : 'trailDetailTrophy';
+      const trophy = document.getElementById(trophyId);
+      if(trophy) {
+        setTimeout(() => trophy.classList.add('shine'), 600);
+      }
+    }
+  },
+
+  render(history, streak) {
+    this.init('trailPath');
+    this.init('trailDetailPath', true);
+
+    const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    const todayIdx = new Date().getDay();
+
+    // Update streak label
+    const streakLabel = document.getElementById('trailStreak');
+    if(streakLabel) streakLabel.textContent = `🔥 ${streak} dia${streak !== 1 ? 's' : ''}`;
+
+    // Stamp completed days from history
+    for(let i = 0; i < 7; i++) {
+      const dayOffset = 6 - i;
+      const dateStr = App.getDateString(dayOffset);
+      const record = history.find(h => h.date === dateStr);
+
+      if(record && record.percentage >= 50) {
+        setTimeout(() => {
+          this.stampDay('trailPath', i, history, streak);
+          this.stampDay('trailDetailPath', i, history, streak);
+        }, i * 150 + 500);
+      }
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 8: APLICAÇÃO PRINCIPAL
 // ═══════════════════════════════════════════════════════════════
 const App = {
   habits:[], profile:{petName:'Rex', tutorName:'Tutor', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf'},
-  history:[], exercisesDone:0, currentFilter:'all', pendingHabitId:null, pendingHabitAction:null, isLoading:false, gestureHintShown:false,
+  history:[], exercisesDone:0, currentFilter:'all', pendingHabitId:null, pendingHabitAction:null, isLoading:false, gestureHintShown:false, highFiveHintShown:false,
 
   async init() {
     SkeletonManager.show();
@@ -309,6 +576,7 @@ const App = {
     GestureEngine.ptr.init();
     GestureEngine.swipe.init();
     GestureEngine.longPress.init();
+    HighFiveEngine.init();
     this.setupServiceWorker();
     this.checkOnlineStatus();
     await this.loadData();
@@ -316,6 +584,7 @@ const App = {
     SkeletonManager.hide();
     this.renderAll();
     this.showGestureHint();
+    WeeklyTrailEngine.render(this.history, this.calculateStreak());
   },
 
   async refreshData() {
@@ -324,6 +593,7 @@ const App = {
     await this.checkDayReset();
     SkeletonManager.hide();
     this.renderAll();
+    WeeklyTrailEngine.render(this.history, this.calculateStreak());
     this.showToast('⚡ Dados sincronizados!', 'success');
   },
 
@@ -335,6 +605,7 @@ const App = {
     this.history = data.history || [];
     this.exercisesDone = data.exercises || 0;
     this.gestureHintShown = data.gestureHint || false;
+    this.highFiveHintShown = data.highFiveHint || false;
     this.isLoading = false;
   },
 
@@ -383,10 +654,39 @@ const App = {
     const ei = document.getElementById('energyIcon');
     const el = document.getElementById('energyLevel');
     const eh = document.getElementById('energyHint');
-    if(percentage>=80) { energyBlock.classList.add('high'); ei.textContent='🔥'; el.textContent='Alta'; eh.textContent='Vocês estão imparáveis! 🚀'; }
-    else if(percentage>=50) { energyBlock.classList.add('medium'); ei.textContent='⚡'; el.textContent='Média'; eh.textContent='Bom ritmo! Continue sincronizando'; }
-    else if(percentage>0) { energyBlock.classList.add('low'); ei.textContent='💡'; el.textContent='Aquecendo'; eh.textContent='Cada hábito conta! Vamos lá'; }
-    else { energyBlock.classList.add('low'); ei.textContent='💤'; el.textContent='Baixa'; eh.textContent='Complete hábitos para energizar!'; }
+
+    // Avatar de Energia v4
+    const avatar = document.getElementById('energyAvatar');
+    const avatarFace = document.getElementById('energyAvatarFace');
+
+    if(percentage>=80) { 
+      energyBlock.classList.add('high'); 
+      if(ei) ei.textContent='🔥'; 
+      if(el) el.textContent='Alta'; 
+      if(eh) eh.textContent='Vocês estão imparáveis! 🚀'; 
+      if(avatar) { avatar.className = 'energy-avatar happy'; avatarFace.textContent = '🤩'; }
+    }
+    else if(percentage>=50) { 
+      energyBlock.classList.add('medium'); 
+      if(ei) ei.textContent='⚡'; 
+      if(el) el.textContent='Média'; 
+      if(eh) eh.textContent='Bom ritmo! Continue sincronizando'; 
+      if(avatar) { avatar.className = 'energy-avatar run'; avatarFace.textContent = '🏃'; }
+    }
+    else if(percentage>0) { 
+      energyBlock.classList.add('low'); 
+      if(ei) ei.textContent='💡'; 
+      if(el) el.textContent='Aquecendo'; 
+      if(eh) eh.textContent='Cada hábito conta! Vamos lá'; 
+      if(avatar) { avatar.className = 'energy-avatar'; avatarFace.textContent = '🐕'; }
+    }
+    else { 
+      energyBlock.classList.add('low'); 
+      if(ei) ei.textContent='💤'; 
+      if(el) el.textContent='Baixa'; 
+      if(eh) eh.textContent='Complete hábitos para energizar!'; 
+      if(avatar) { avatar.className = 'energy-avatar sad'; avatarFace.textContent = '😔'; }
+    }
   },
 
   renderHabits() {
@@ -400,7 +700,7 @@ const App = {
     const sorted = [...filtered].sort((a,b)=>{ if(a.completed!==b.completed) return a.completed?1:-1; return (a.time||'00:00').localeCompare(b.time||'00:00'); });
     container.innerHTML = sorted.map(habit=>`
       <div class="habit-card-wrapper" data-id="${habit.id}">
-        <div class="habit-card-bg swipe-left"><span class="swipe-action-icon">✅</span></div>
+        <div class="habit-card-bg swipe-left"><span class="swipe-action-icon">🐾</span></div>
         <div class="habit-card-bg swipe-right"><span class="swipe-action-icon">↩️</span></div>
         <div class="habit-card ${habit.completed?'completed':''}">
           <div class="habit-icon">${habit.icon||'✨'}</div>
@@ -433,16 +733,49 @@ const App = {
     });
   },
 
+  // v4: High-Five Modal
+  showHighFiveModal(habit) {
+    document.getElementById('highfiveHabitName').textContent = habit.title;
+    HighFiveEngine.setAvatars(
+      this.profile.avatar,
+      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(this.profile.tutorName)}&backgroundColor=d1fae5`
+    );
+    this.openModal('modalHighFive');
+  },
+
+  async completeHighFiveHabit() {
+    if(this.pendingHabitId) {
+      const habit = this.habits.find(h=>h.id===this.pendingHabitId);
+      if(habit) {
+        habit.completed = true;
+        this.exercisesDone++;
+        await DataLayer.saveExercises(this.exercisesDone);
+        await this.saveHabits();
+        this.renderAll();
+        WeeklyTrailEngine.render(this.history, this.calculateStreak());
+        this.showToast('🔥 High-Five completo! Dupla sincronizada!', 'success');
+        if(navigator.vibrate) navigator.vibrate([30,50,30]);
+      }
+    }
+    this.pendingHabitId = null; 
+    this.pendingHabitAction = null;
+    setTimeout(() => {
+      this.closeModal('modalHighFive');
+      HighFiveEngine.reset();
+    }, 800);
+  },
+
   async toggleHabit(id) {
     const habit = this.habits.find(h=>h.id===id);
     if(!habit) return;
     if(!habit.completed) {
       this.pendingHabitId = id; this.pendingHabitAction = 'complete';
-      this.showExerciseModal(habit);
+      this.showHighFiveModal(habit);
     } else {
       habit.completed = false;
       await this.saveHabits();
       this.renderAll();
+      WeeklyTrailEngine.render(this.history, this.calculateStreak());
       this.showToast('🔄 Hábito desmarcado', 'info');
     }
   },
@@ -452,6 +785,7 @@ const App = {
     this.habits = this.habits.filter(h=>h.id!==id);
     await this.saveHabits();
     this.renderAll();
+    WeeklyTrailEngine.render(this.history, this.calculateStreak());
     this.showToast('🗑️ Hábito removido', 'info');
   },
 
@@ -467,7 +801,7 @@ const App = {
     this.closeModal('modalAddHabit');
     this.renderAll();
     this.showToast('🎉 Hábito adicionado! Que tal um exercício?', 'success');
-    setTimeout(()=>{ this.pendingHabitId=newHabit.id; this.pendingHabitAction='complete'; this.showExerciseModal(newHabit); }, 400);
+    setTimeout(()=>{ this.pendingHabitId=newHabit.id; this.pendingHabitAction='complete'; this.showHighFiveModal(newHabit); }, 400);
   },
 
   getRandomExercise(category) { const list=ExerciseDB[category]||ExerciseDB.outro; return list[Math.floor(Math.random()*list.length)]; },
@@ -490,6 +824,7 @@ const App = {
         await DataLayer.saveExercises(this.exercisesDone);
         await this.saveHabits();
         this.renderAll();
+        WeeklyTrailEngine.render(this.history, this.calculateStreak());
         this.showToast('🔥 Hábito + Exercício concluídos! Dupla sincronizada!', 'success');
         if(navigator.vibrate) navigator.vibrate([30,50,30]);
       }
@@ -549,6 +884,7 @@ const App = {
     document.getElementById('statsEnergy').textContent = percentage+'%';
     document.getElementById('statsExercises').textContent = this.exercisesDone;
     this.renderHistoryBars();
+    WeeklyTrailEngine.render(this.history, this.calculateStreak());
     this.openModal('modalStats');
   },
 
@@ -617,10 +953,21 @@ const App = {
       this.renderHabits();
     }));
     document.querySelectorAll('.modal-overlay').forEach(overlay=>overlay.addEventListener('click', (e)=>{
-      if(e.target===overlay) { const id=overlay.id; if(id==='modalExercise') this.dismissExercise(); else this.closeModal(id); }
+      if(e.target===overlay) { 
+        const id=overlay.id; 
+        if(id==='modalExercise') this.dismissExercise(); 
+        else if(id==='modalHighFive') { this.closeModal(id); HighFiveEngine.reset(); }
+        else this.closeModal(id); 
+      }
     }));
     document.addEventListener('keydown', (e)=>{
-      if(e.key==='Escape') { document.querySelectorAll('.modal-overlay.active').forEach(modal=>{ if(modal.id==='modalExercise') this.dismissExercise(); else this.closeModal(modal.id); }); }
+      if(e.key==='Escape') { 
+        document.querySelectorAll('.modal-overlay.active').forEach(modal=>{ 
+          if(modal.id==='modalExercise') this.dismissExercise(); 
+          else if(modal.id==='modalHighFive') { this.closeModal(modal.id); HighFiveEngine.reset(); }
+          else this.closeModal(modal.id); 
+        }); 
+      }
       if(e.key==='Enter' && document.activeElement.id==='habitTitle') this.addHabit();
     });
     let touchStartY=0;
@@ -628,17 +975,24 @@ const App = {
       sheet.addEventListener('touchstart', (e)=>{ touchStartY=e.touches[0].clientY; }, {passive:true});
       sheet.addEventListener('touchend', (e)=>{
         const diff = e.changedTouches[0].clientY - touchStartY;
-        if(diff>100) { const modal=sheet.closest('.modal-overlay'); if(modal){ if(modal.id==='modalExercise') this.dismissExercise(); else this.closeModal(modal.id); } }
+        if(diff>100) { 
+          const modal=sheet.closest('.modal-overlay'); 
+          if(modal){ 
+            if(modal.id==='modalExercise') this.dismissExercise(); 
+            else if(modal.id==='modalHighFive') { this.closeModal(modal.id); HighFiveEngine.reset(); }
+            else this.closeModal(modal.id); 
+          } 
+        }
       }, {passive:true});
     });
   },
 
   setupServiceWorker() {
     if(!('serviceWorker' in navigator)) return;
-    const swCode = `const CACHE_NAME='petfit-sync-v3'; const STATIC_ASSETS=['/','/index.html','/style.css','/script.js','/manifest.json']; self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(STATIC_ASSETS)).then(()=>self.skipWaiting()))}); self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))}); self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(cached=>{if(cached)return cached;return fetch(e.request).then(response=>{if(response&&response.ok){const clone=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(e.request,clone));}return response;}).catch(()=>new Response('Offline',{status:503}));}));});`;
+    const swCode = `const CACHE_NAME='petfit-sync-v4'; const STATIC_ASSETS=['/','/index.html','/style.css','/script.js','/manifest.json']; self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(STATIC_ASSETS)).then(()=>self.skipWaiting()))}); self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))}); self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(cached=>{if(cached)return cached;return fetch(e.request).then(response=>{if(response&&response.ok){const clone=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(e.request,clone));}return response;}).catch(()=>new Response('Offline',{status:503}));}));});`;
     const blob = new Blob([swCode], {type:'application/javascript'});
     const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl).then(()=>console.log('[PetFit] SW v3 registrado')).catch(err=>console.log('[PetFit] Erro no SW:',err));
+    navigator.serviceWorker.register(swUrl).then(()=>console.log('[PetFit] SW v4 registrado')).catch(err=>console.log('[PetFit] Erro no SW:',err));
   },
 
   checkOnlineStatus() {
