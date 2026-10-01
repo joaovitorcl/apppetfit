@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#f97316">
   <meta name="background-color" content="#f8f6f1">
-  <meta name="description" content="PetFit Sync v4.0 — Microinterações progressivas para pets e tutores. High-Five, Avatar de Energia e Trilha de Pegadas.">
+  <meta name="description" content="PetFit Sync — Gestão de hábitos para pets e tutores. Conecte-se diariamente com saúde e movimento.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PetFit Sync">
@@ -23,6 +23,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- ═══════════════════════════════════════════════════════
+       FIREBASE SDK — DESCOMENTE PARA USAR FIREBASE
+       ═══════════════════════════════════════════════════════ -->
+  <!--
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  -->
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -85,32 +94,15 @@
         </div>
       </div>
 
-      <!-- REAL: Energia + Avatar de Energia v4 -->
+      <!-- REAL: Energia -->
       <div class="energy-block low" id="realEnergy" style="display:none;">
-        <div class="energy-avatar-wrap" id="energyAvatarWrap">
-          <div class="energy-avatar" id="energyAvatar">
-            <span class="energy-avatar-face" id="energyAvatarFace">🐕</span>
-            <div class="energy-avatar-glow" id="energyAvatarGlow"></div>
-          </div>
-          <div class="energy-avatar-shadow" id="energyAvatarShadow"></div>
+        <div class="energy-icon-wrap">
+          <span class="energy-icon" id="energyIcon">💤</span>
         </div>
         <div class="energy-info">
           <span class="energy-label">Energia da Dupla</span>
           <span class="energy-level" id="energyLevel">Baixa</span>
           <span class="energy-hint" id="energyHint">Carregando...</span>
-        </div>
-      </div>
-
-      <!-- Trilha de Progresso Semanal (Pegadas) v4 -->
-      <div class="weekly-trail-block" id="weeklyTrailBlock" style="display:none;">
-        <div class="trail-header">
-          <span class="trail-label">Trilha da Semana</span>
-          <span class="trail-streak" id="trailStreak">🔥 0 dias</span>
-        </div>
-        <div class="trail-park" id="trailPark">
-          <div class="trail-grass"></div>
-          <div class="trail-path" id="trailPath"></div>
-          <div class="trail-trophy" id="trailTrophy">🏆</div>
         </div>
       </div>
 
@@ -262,50 +254,6 @@
     </div>
   </div>
 
-  <!-- Modal: High-Five Check-in v4 -->
-  <div class="modal-overlay" id="modalHighFive">
-    <div class="modal-sheet modal-highfive">
-      <div class="modal-handle"></div>
-      <div class="highfive-stage">
-        <div class="highfive-avatars" id="highfiveAvatars">
-          <div class="hf-avatar-pet" id="hfAvatarPet">
-            <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Pet" id="hfPetImg">
-          </div>
-          <div class="hf-avatar-tutor" id="hfAvatarTutor">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tutor&backgroundColor=d1fae5" alt="Tutor" id="hfTutorImg">
-          </div>
-        </div>
-        <div class="highfive-spark" id="highfiveSpark">✨</div>
-        <div class="highfive-habit-name" id="highfiveHabitName">Hábito</div>
-        <p class="highfive-instruction">Segure o botão para dar um high-five!</p>
-
-        <div class="hf-button-wrap" id="hfButtonWrap">
-          <div class="hf-ring"></div>
-          <svg class="hf-progress-ring" viewBox="0 0 140 140">
-            <circle class="hf-progress-bg" cx="70" cy="70" r="64"/>
-            <circle class="hf-progress-fill" cx="70" cy="70" r="64" id="hfProgressCircle"/>
-          </svg>
-          <button class="hf-btn" id="hfHoldBtn">
-            <span class="hf-btn-icon" id="hfBtnIcon">🐾</span>
-            <span class="hf-btn-label" id="hfBtnLabel" style="display:none;">COMPLETO</span>
-          </button>
-          <div class="hf-confetti-area" id="hfConfettiArea"></div>
-        </div>
-
-        <div class="hf-haptic-bars" id="hfHapticBars">
-          <div class="haptic-bar"></div>
-          <div class="haptic-bar"></div>
-          <div class="haptic-bar"></div>
-          <div class="haptic-bar"></div>
-          <div class="haptic-bar"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary btn-full" id="dismissHighFive">Fechar</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal: Sugestão de Exercício -->
   <div class="modal-overlay" id="modalExercise">
     <div class="modal-sheet modal-exercise">
@@ -404,14 +352,6 @@
         <div class="history-section">
           <h3>Histórico dos últimos 7 dias</h3>
           <div class="history-bars" id="historyBars"></div>
-        </div>
-        <!-- Trilha Semanal Detalhada v4 -->
-        <div class="trail-detail-section">
-          <h3>🌳 Trilha da Semana</h3>
-          <div class="trail-detail-park" id="trailDetailPark">
-            <div class="trail-detail-path" id="trailDetailPath"></div>
-            <div class="trail-detail-trophy" id="trailDetailTrophy">🏆</div>
-          </div>
         </div>
       </div>
       <div class="modal-footer">

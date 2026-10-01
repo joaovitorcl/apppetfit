@@ -2,7 +2,7 @@
 
 PWA de Gestão de Hábitos para **Pets e Tutores**.
 
-> **Versão atual:** 4.0 | **Microinterações Progressivas**
+> **Versão atual:** 3.0 | **Gestures + Skeletons + Firebase-ready**
 
 ---
 
@@ -12,98 +12,79 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 > *Lançamento inicial com conceito Thumb-Friendly*
 
 - ✅ **Acompanhamento Duplo**: Hábitos do pet + exercícios para o tutor
-- ✅ **Microexercícios Dinâmicos**: Sugestões por categoria
+- ✅ **Microexercícios Dinâmicos**: Sugestões por categoria (alimentação, passeio, medicação, etc.)
 - ✅ **Energia da Dupla**: Indicador visual de sintonia pet + tutor
-- ✅ **Thumb-Friendly Zone**: Navegação inferior, touch targets ≥48px
+- ✅ **Thumb-Friendly Zone**: Navegação inferior, ações na base, touch targets ≥48px
 - ✅ **PWA Completo**: Manifest, Service Worker, offline support
 - ✅ **localStorage**: Persistência local de dados
 - ✅ **Reset Diário Automático**: Hábitos resetam a cada dia com histórico
 - ✅ **7 Hábitos Padrão**: Alimentação, passeio, escovação, medicação, brincadeira
 - ✅ **Dark/Warm Theme**: Paleta off-white + laranja coral
+- ✅ **Fonte Inter**: Ótima legibilidade mobile
+- ✅ **Swipe-to-Dismiss nos Modais**: Fechar arrastando para baixo
+- ✅ **Haptic Feedback**: Vibração sutil nos botões
+
+---
 
 ### 🔥 v2.0 — Skeletons + Firebase
 > *Estados de carregamento e camada de dados abstrata*
 
-- 🦴 **Skeleton Screens** com efeito shimmer
-- 🔥 **DataLayer Firebase-ready**: troque localStorage ↔ Firestore com 1 linha
-- Autenticação anônima integrada
+#### 🦴 Skeleton Screens
+- Skeleton com **efeito shimmer** em toda a interface
+- Estados de carregamento em: Progresso do Dia, Energia da Dupla, Lista de Hábitos
+- **Fade suave** ao trocar skeleton → conteúdo real
+- Simula latência de rede para garantir visualização do skeleton
 
-### 👆 v3.0 — Gestures
+#### 🔥 DataLayer — Firebase-ready
+- **Camada de dados abstrata**: troque `localStorage` ↔ `Firebase Firestore` com 1 linha
+- Driver `localStorage` (padrão, zero config, offline)
+- Driver `Firebase` (cloud, sincronização entre dispositivos)
+- Autenticação anônima integrada
+- Para ativar: mude `useFirebase: true` e descomente os SDKs
+
+---
+
+### 👆 v3.0 — Gestures (ATUAL)
 > *Navegação por gestos nativos de mobile*
 
-- ⬇️ **Pull-to-Refresh**
-- 👈👉 **Swipe Left/Right** nos cards de hábito
-- 👆 **Long-Press** menu de contexto
-- 💡 **Gesture Hint** educativo
+#### ⬇️ Pull-to-Refresh
+- **Puxe para baixo** na lista de hábitos para sincronizar dados
+- Indicador visual com ícone rotativo e texto de status
+- Animação suave de retorno após sincronização
 
-### ✨ v4.0 — Microinterações Progressivas (ATUAL)
-> *Experiência tátil e visual imersiva*
+#### 👈👉 Swipe nos Cards de Hábito
+- **Deslize para a ESQUERDA** → Completa o hábito (abre modal de exercício)
+- **Deslize para a DIREITA** → Desmarca o hábito (se já estiver concluído)
+- Background colorido revela a ação durante o swipe (verde = completar, vermelho = desfazer)
+- Snap automático com animação elástica
 
----
+#### 👆 Long-Press (Toque Longo)
+- **Segure** qualquer card de hábito por 500ms
+- Abre **menu de contexto** com opções:
+  - ✅ Concluir / ↩️ Desmarcar
+  - 💪 Ver exercício
+  - ✏️ Editar (em breve)
+  - 🗑️ Excluir
+- Vibração tátil ao ativar (haptic feedback)
+- Fecha ao tocar fora do menu
 
-## 🎨 Microinterações v4.0
-
-### 🐾 1. Botão de Check-in "High-Five"
-Substitui o simples botão de confirmar por uma experiência **Press & Hold** imersiva.
-
-**Como funciona:**
-- O usuário pressiona e segura o botão de pata (🐾)
-- Um anel radial começa a encher progressivamente em torno do botão
-- Os avatares do pet e do tutor se movem suavemente em direção um ao outro
-- Barras de feedback háptico visual pulsam em sincronia
-- O celular vibra com intensidade crescente (Haptic Feedback)
-- Ao atingir 100%, os avatares se "encontram" em um high-five
-- **Explosão de confete** com patas, estrelas e faíscas
-- O botão se transforma em "✓ COMPLETO" com glow verde
-- O hábito é marcado como concluído automaticamente
-
-**Tecnologias:** SVG stroke-dasharray animation, CSS transforms, requestAnimationFrame, Vibration API
+#### 💡 Gesture Hint
+- Banner educativo na primeira abertura explicando os gestos
+- "Deslize o hábito para ações rápidas · Segure para menu"
+- Fecha permanentemente após dismiss (salvo no localStorage/Firebase)
 
 ---
 
-### ⚡ 4. Avatar de Energia (Estados do Pet)
-O avatar do pet na tela inicial ganha **personalidade e estados emocionais** baseados no progresso.
-
-**Estados:**
-| Estado | Condição | Visual | Animação |
-|--------|----------|--------|----------|
-| 😔 **Triste** | 0% concluído | Avatar cinza, inclinado, expressão triste | Sombra alongada, sem movimento |
-| 🐕 **Normal** | 1-49% | Avatar padrão, cor laranja | Estado estático |
-| 🏃 **Correndo** | 50-79% | Avatar com glow pulsante ao redor | Animação contínua de corrida (shake lateral) |
-| 🤩 **Feliz** | 80-100% | Avatar brilhante, expressão animada | Pulso de alegria com scale e bounce |
-
-**Comportamento adicional:**
-- Ao clicar em "Iniciar Exercício", o pet dá um **pulo animado** (jump) independente do estado
-- Transições suaves entre estados com cubic-bezier easing
-- O glow ao redor do avatar em estado "correndo" pulsa suavemente
-
----
-
-### 👣 5. Trilha de Progresso Semanal (Pegadas)
-Um componente visual gamificado que transforma o progresso semanal em uma **trilha no parque**.
-
-**Como funciona:**
-- Fundo simulando um parque com grama verde
-- Trilha sinuosa com 7 segmentos (um para cada dia da semana)
-- A cada dia concluído (≥50% dos hábitos), o segmento se ilumina
-- **Carimbo animado**: uma pegada de tênis (👟) e uma pegada de pata (🐾) "carimbam" o caminho
-- Animação de wiggle no carimbo para simular o impacto
-- Os segmentos se iluminam sequencialmente com delay escalonado
-- No final da semana, um **troféu (🏆)** brilha e pulsa ao ser atingido
-- Mostrado tanto no dashboard quanto no modal de estatísticas
-
----
-
-## 📁 Estrutura
+## 📁 Estrutura (3 arquivos principais)
 
 ```
 petfit-sync/
-├── index.html       ← Skeletons + Microinterações + Firebase SDK
-├── style.css        ← Skeleton shimmer + Thumb Zone + Gestures + Microinterações
-├── script.js        ← DataLayer + SkeletonManager + GestureEngine + HighFiveEngine + WeeklyTrailEngine + App
-├── manifest.json    ← PWA manifest v4
+├── index.html       ← Skeletons + Firebase SDK + Gesture areas
+├── style.css        ← Skeleton shimmer + Thumb Zone + Gesture styles
+├── script.js        ← DataLayer + SkeletonManager + GestureEngine + App
+├── manifest.json    ← PWA manifest
 └── assets/
-    └── icons/       ← Ícones SVG (192x192, 512x512)
+    └── icons/       ← Placeholders (substitua por PNGs reais)
 ```
 
 ---
@@ -129,15 +110,10 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 
 ---
 
-## ⚡ Funcionalidades Completas (v4.0)
+## ⚡ Funcionalidades Completas (v3.0)
 
 | Categoria | Feature | Status |
 |---|---|---|
-| **Microinterações** | High-Five Press & Hold | ✅ |
-| **Microinterações** | Avatar de Energia (4 estados) | ✅ |
-| **Microinterações** | Trilha Semanal com Pegadas | ✅ |
-| **Microinterações** | Confete de Patas | ✅ |
-| **Microinterações** | Haptic Feedback Progressivo | ✅ |
 | **Gestures** | Pull-to-Refresh | ✅ |
 | **Gestures** | Swipe Left/Right nos cards | ✅ |
 | **Gestures** | Long-Press menu de contexto | ✅ |

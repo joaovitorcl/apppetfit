@@ -1,7 +1,7 @@
 {
   "name": "PetFit Sync — Hábitos para Pets e Tutores",
   "short_name": "PetFit Sync",
-  "description": "Gestão de hábitos para pets e tutores com Microinterações Progressivas, Skeletons, Gestures e Firebase-ready. Conecte-se diariamente com saúde e movimento.",
+  "description": "Gestão de hábitos para pets e tutores com Skeletons, Gestures e Firebase-ready. Conecte-se diariamente com saúde e movimento.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8f6f1",
