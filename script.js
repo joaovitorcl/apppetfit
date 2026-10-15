@@ -962,6 +962,7 @@ async finishProfileSetup() {
   }
 
   this.showToast('🐾 Perfil da dupla salvo!', 'success');
+   this.closeModal('modalTutorProfile');
 },
 
   renderHistoryBars() {
