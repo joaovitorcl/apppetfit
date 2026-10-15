@@ -934,11 +934,20 @@ async savePetStep() {
   this.openModal('modalTutorProfile');
 },
 
+
 async finishProfileSetup() {
-  const tutorName = document.getElementById('tutorNameInput').value.trim();
+  const tutorNameInput = document.getElementById('tutorNameInput');
+
+  if (!tutorNameInput) {
+    console.error('Campo tutorNameInput não encontrado no HTML.');
+    return;
+  }
+
+  const tutorName = tutorNameInput.value.trim();
 
   if (!tutorName) {
     alert('Digite o nome do tutor.');
+    tutorNameInput.focus();
     return;
   }
 
@@ -955,15 +964,9 @@ async finishProfileSetup() {
   this.closeModal('modalTutorProfile');
   this.renderHeader();
 
-  const profileTutorImage = document.getElementById('tutorAvatarImg');
-  if (profileTutorImage) {
-    profileTutorImage.src =
-      this.profile.tutorAvatar || './assets/icons/iconavatar1.png';
-  }
-
   this.showToast('🐾 Perfil da dupla salvo!', 'success');
-   this.closeModal('modalTutorProfile');
 },
+
 
   renderHistoryBars() {
     const container = document.getElementById('historyBars');
@@ -1011,6 +1014,52 @@ async finishProfileSetup() {
   },
 
   setupEventListeners() {
+    
+document.getElementById('btnProfile')?.addEventListener(
+  'click',
+  () => this.openProfile()
+);
+
+document.getElementById('savePetBtn')?.addEventListener(
+  'click',
+  () => this.savePetStep()
+);
+
+document.getElementById('finishProfileBtn')?.addEventListener(
+  'click',
+  () => this.finishProfileSetup()
+);
+
+document.getElementById('closeTutorProfile')?.addEventListener(
+  'click',
+  () => this.closeModal('modalTutorProfile')
+);
+
+const tutorPhotoInput = document.getElementById('tutorPhotoInput');
+const customTutorAvatar = document.getElementById('customTutorAvatar');
+
+if (tutorPhotoInput && customTutorAvatar) {
+  tutorPhotoInput.addEventListener('change', () => {
+    const file = tutorPhotoInput.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Selecione uma imagem válida.');
+      tutorPhotoInput.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = event => {
+      customTutorAvatar.src = event.target.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+    
     document.getElementById('btnProfile').addEventListener('click', ()=>this.openProfile());
     document.getElementById('savePetBtn')
   .addEventListener('click', () => this.savePetStep());
@@ -1138,20 +1187,6 @@ if (petPhotoInput) {
 
 document.addEventListener('DOMContentLoaded', ()=>{ App.init(); });
 
-document.getElementById('savePetBtn').addEventListener(
-  'click',
-  () => this.savePetStep()
-);
-
-document.getElementById('finishProfileBtn').addEventListener(
-  'click',
-  () => this.finishProfileSetup()
-);
-
-document.getElementById('closeTutorProfile').addEventListener(
-  'click',
-  () => this.closeModal('modalTutorProfile')
-);
 
 const tutorPhotoInput = document.getElementById('tutorPhotoInput');
 const customTutorAvatar = document.getElementById('customTutorAvatar');
