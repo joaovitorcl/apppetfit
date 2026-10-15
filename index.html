@@ -261,6 +261,26 @@
             </button>
         </div>
 
+        <div class="pet-avatar-editor">
+            <img
+                src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf"
+                alt="Avatar do pet"
+                id="customPetAvatar"
+                class="custom-pet-avatar"
+            >
+
+            <label for="petPhotoInput" class="pet-avatar-button">
+                📷 Alterar foto
+            </label>
+
+            <input
+                type="file"
+                id="petPhotoInput"
+                accept="image/*"
+                hidden
+            >
+        </div>
+
         <div class="modal-body">
             <div class="form-group">
                 <label for="profileTitle">Nome do Pet</label>

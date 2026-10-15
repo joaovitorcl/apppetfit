@@ -923,6 +923,30 @@ const App = {
     document.getElementById('openAddProfile').addEventListener('click', () => {this.openModal('modalAddProfile');});
     document.getElementById('closeAddProfile').addEventListener('click', () => {this.closeModal('modalAddProfile');});
     
+    const petPhotoInput = document.getElementById('petPhotoInput');
+    const customPetAvatar = document.getElementById('customPetAvatar');
+
+    if (petPhotoInput && customPetAvatar) {
+      petPhotoInput.addEventListener('change', () => {
+        const file = petPhotoInput.files[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+          alert('Selecione um arquivo de imagem válido.');
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          customPetAvatar.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
+      });
+    }
+
     document.getElementById('closeStats').addEventListener('click', ()=>this.closeModal('modalStats'));
     document.getElementById('closeStatsBtn').addEventListener('click', ()=>this.closeModal('modalStats'));
     document.getElementById('saveHabitBtn').addEventListener('click', ()=>this.addHabit());

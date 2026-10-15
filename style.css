@@ -704,6 +704,38 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: var(--ls-tight); line-height: v
     }
 }
 
+/* Foto do pet no modal de personalização */
+.modal-personalizar .pet-avatar-editor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 24px;
+}
+
+.modal-personalizar .custom-pet-avatar {
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #D8F0E9;
+    background: #EAF5F1;
+}
+
+.modal-personalizar .pet-avatar-button {
+    padding: 9px 16px;
+    border-radius: 20px;
+    background: #D8F0E9;
+    color: #145C50;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.modal-personalizar .pet-avatar-button:hover {
+    opacity: 0.8;
+}
+
 
 .modal-sheet {
   background: var(--bg-card); width: 100%; max-width: 560px;
