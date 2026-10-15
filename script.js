@@ -1011,6 +1011,8 @@ async finishProfileSetup() {
 
   setupEventListeners() {
     document.getElementById('btnProfile').addEventListener('click', ()=>this.openProfile());
+    document.getElementById('savePetBtn')
+  .addEventListener('click', () => this.savePetStep());
     document.getElementById('btnSyncNow').addEventListener('click', async (e)=>{
       const btn = e.currentTarget; btn.classList.add('is-syncing'); Motion.haptic(20);
       try { await this.refreshData(); } finally { btn.classList.remove('is-syncing'); }
