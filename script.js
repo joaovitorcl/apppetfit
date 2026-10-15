@@ -873,17 +873,15 @@ async openProfile() {
 },
 
 
-  async saveProfile() {
-    const petName = document.getElementById('petName').value.trim()||'Rex';
-    const tutorName = document.getElementById('tutorName').value.trim()||'Tutor';
-    this.profile.petName = petName;
-    this.profile.tutorName = tutorName;
-    this.profile.avatar = 'https://api.dicebear.com/7.x/fun-emoji/svg?seed='+encodeURIComponent(petName)+'&backgroundColor=ffdfbf';
-    await this.persistProfile();
-    this.renderHeader();
+ 
+async saveProfile() {
+    const petName = document.getElementById('petName').value.trim() || 'Rex';
+    const tutorName = document.getElementById('tutorName').value.trim() || 'Tutor';
+
+    // Apenas fecha a janela de edição
     this.closeModal('modalProfile');
-    this.showToast('🐾 Perfil atualizado!', 'success');
-  },
+},
+
 
   openSettings() { SettingsUI.sync(); this.openModal('modalSettings'); },
 
