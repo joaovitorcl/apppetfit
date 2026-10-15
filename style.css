@@ -704,6 +704,48 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: var(--ls-tight); line-height: v
     }
 }
 
+
+/* Fotos do pet e do tutor no perfil */
+.profile-photos {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.profile-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-person .profile-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent, #0a7777);
+}
+
+.profile-photo-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.profile-info label {
+  display: block;
+  margin: 10px 0 5px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.profile-info .profile-input[readonly] {
+  cursor: default;
+  opacity: 1;
+}
+
 /* Foto do pet no modal de personalização */
 .modal-personalizar .pet-avatar-editor {
     display: flex;

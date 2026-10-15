@@ -616,10 +616,24 @@ const App = {
 
   renderAll() { this.renderHeader(); this.renderDashboard(); this.renderHabits(); },
 
-  renderHeader() {
-    const img = document.getElementById('headerAvatarImg');
-    if(img) img.src = this.profile.avatar;
-  },
+ 
+renderHeader() {
+  const avatar = this.profile?.avatar || './assets/icons/iconpet1.png';
+
+  const imageIds = [
+    'headerAvatarImg',
+    'profileAvatarImg',
+    'customPetAvatar'
+  ];
+
+  imageIds.forEach(id => {
+    const img = document.getElementById(id);
+    if (img) {
+      img.src = avatar;
+    }
+  });
+},
+
 
   renderDashboard() {
     const total = this.habits.length;
@@ -823,15 +837,41 @@ const App = {
     if(titleInput) titleInput.value = '';
   },
 
-  async openProfile() {
-    document.getElementById('petName').value = this.profile.petName;
-    document.getElementById('tutorName').value = this.profile.tutorName;
-    document.getElementById('profileAvatarImg').src = this.profile.avatar;
-    Motion.countUp(document.getElementById('statStreak'), this.calculateStreak(), { from: 0 });
-    Motion.countUp(document.getElementById('statTotal'), this.habits.length, { from: 0 });
-    Motion.countUp(document.getElementById('statDone'), this.habits.filter(h=>h.completed).length, { from: 0 });
-    this.openModal('modalProfile');
-  },
+  
+async openProfile() {
+  const petName = this.profile?.petName || 'Rex';
+  const tutorName = this.profile?.tutorName || 'Tutor';
+  const avatar = this.profile?.avatar || './assets/icons/iconpet1.png';
+
+  document.getElementById('petName').value = petName;
+  document.getElementById('tutorName').value = tutorName;
+
+  ['headerAvatarImg', 'profileAvatarImg', 'customPetAvatar'].forEach(id => {
+    const img = document.getElementById(id);
+    if (img) img.src = avatar;
+  });
+
+  Motion.countUp(
+    document.getElementById('statStreak'),
+    this.calculateStreak(),
+    { from: 0 }
+  );
+
+  Motion.countUp(
+    document.getElementById('statTotal'),
+    this.habits.length,
+    { from: 0 }
+  );
+
+  Motion.countUp(
+    document.getElementById('statDone'),
+    this.habits.filter(h => h.completed).length,
+    { from: 0 }
+  );
+
+  this.openModal('modalProfile');
+},
+
 
   async saveProfile() {
     const petName = document.getElementById('petName').value.trim()||'Rex';
@@ -923,7 +963,40 @@ const App = {
     document.getElementById('openAddProfile').addEventListener('click', () => {this.openModal('modalAddProfile');});
     document.getElementById('closeAddProfile').addEventListener('click', () => {this.closeModal('modalAddProfile');});
     
-    const petPhotoInput = document.getElementById('petPhotoInput');
+    
+const petPhotoInput = document.getElementById('petPhotoInput');
+
+if (petPhotoInput) {
+  petPhotoInput.addEventListener('change', async () => {
+    const file = petPhotoInput.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Selecione um arquivo de imagem válido.');
+      petPhotoInput.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async (event) => {
+      const avatar = event.target.result;
+
+      this.profile.avatar = avatar;
+
+      await this.persistProfile();
+
+      this.renderHeader();
+
+      const customAvatar = document.getElementById('customPetAvatar');
+      if (customAvatar) customAvatar.src = avatar;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
     const customPetAvatar = document.getElementById('customPetAvatar');
 
     if (petPhotoInput && customPetAvatar) {

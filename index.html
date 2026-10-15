@@ -74,8 +74,18 @@
           <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"/></svg>
           <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
         </button>
-        <button class="btn-icon header-avatar-btn" id="btnProfile" aria-label="Perfil do pet">
-          <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Avatar do pet" class="header-avatar" id="headerAvatarImg">
+        <button
+          class="btn-icon header-avatar-btn"
+          id="btnProfile"
+          type="button"
+          aria-label="Ver perfil da dupla"
+        >
+          <img
+            src="./assets/icons/iconpet1.png"
+            alt="Foto do pet"
+            class="header-avatar"
+            id="headerAvatarImg"
+          >
         </button>
       </div>
     </div>
@@ -250,7 +260,7 @@
         <div class="modal-handle"></div>
 
         <div class="modal-header">
-            <h2>Personalizar Perfil da Dupla</h2>
+            <h2>Personalizar Perfil do Pet</h2>
 
             <button
                 class="btn-icon modal-close"
@@ -382,37 +392,96 @@
     </div>
   </div>
 
-  <!-- Modal: Perfil do Pet -->
-  <div class="modal-overlay" id="modalProfile">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <h2>Perfil da Dupla</h2>
-        <button class="btn-icon modal-close" id="closeProfile" aria-label="Fechar">
-          <span>✕</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="profile-card">
-          <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Pet" class="profile-avatar" id="profileAvatarImg">
-          <div class="profile-info">
-            <input type="text" id="petName" value="Rex" class="profile-input" placeholder="Nome do pet">
-            <input type="text" id="tutorName" value="Tutor" class="profile-input" placeholder="Seu nome">
+  
+<!-- Modal: Perfil da Dupla -->
+<div class="modal-overlay" id="modalProfile">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+
+    <div class="modal-header">
+      <h2>Perfil da Dupla</h2>
+      <button class="btn-icon modal-close" id="closeProfile"
+              type="button" aria-label="Fechar">
+        <span>✕</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="profile-card">
+        <div class="profile-photos">
+          <div class="profile-person">
+            <img
+              src="./assets/icons/iconpet1.png"
+              alt="Foto do pet"
+              class="profile-avatar"
+              id="profileAvatarImg"
+            >
+            <span class="profile-photo-label">Pet</span>
+          </div>
+
+          <div class="profile-person">
+            <img
+              src="./assets/icons/iconavatar1.png"
+              alt="Foto do tutor"
+              class="profile-avatar"
+              id="tutorAvatarImg"
+            >
+            <span class="profile-photo-label">Tutor</span>
           </div>
         </div>
-        <div class="profile-stats">
-          <div class="stat-box">
-            <span class="stat-number" id="statStreak">0</span>
-            <span class="stat-label">Dias seguidos</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-number" id="statTotal">0</span>
-            <span class="stat-label">Hábitos hoje</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-number" id="statDone">0</span>
-            <span class="stat-label">Concluídos</span>
-          </div>
+
+        
+        <div class="profile-info">
+          <label for="petName">Nome do pet</label>
+          <input
+            type="text"
+            id="petName"
+            value="Rex"
+            class="profile-input"
+            placeholder="Nome do pet"
+            readonly
+          >
+
+          <label for="tutorName">Nome do tutor</label>
+          <input
+            type="text"
+            id="tutorName"
+            value="Tutor"
+            class="profile-input"
+            placeholder="Seu nome"
+            readonly
+          >
+        </div>
+
+      </div>
+
+      <div class="profile-stats">
+        <div class="stat-box">
+          <span class="stat-number" id="statStreak">0</span>
+          <span class="stat-label">Dias seguidos</span>
+        </div>
+
+        <div class="stat-box">
+          <span class="stat-number" id="statTotal">0</span>
+          <span class="stat-label">Hábitos hoje</span>
+        </div>
+
+        <div class="stat-box">
+          <span class="stat-number" id="statDone">0</span>
+          <span class="stat-label">Concluídos</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-primary btn-full" id="saveProfileBtn"
+              type="button">
+        Fechar perfil
+      </button>
+    </div>
+  </div>
+</div>
+
         </div>
       </div>
       <div class="modal-footer">
