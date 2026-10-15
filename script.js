@@ -544,7 +544,7 @@ const GestureEngine = {
 //  SEÇÃO 6: APLICAÇÃO PRINCIPAL
 // ═══════════════════════════════════════════════════════════════
 const App = {
-  habits:[], profile:{petName:'Rex', tutorName:'Tutor', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf'},
+  habits:[], profile:{petName:'Rex', tutorName:'Tutor', avatar:'./assets/icons/iconpet1.png'},
   history:[], exercisesDone:0, currentFilter:'all', pendingHabitId:null, pendingHabitAction:null, isLoading:false, gestureHintShown:false,
   animateList:false, justCompletedId:null, _shownPercent:undefined,
 
