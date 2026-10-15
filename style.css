@@ -669,6 +669,42 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: var(--ls-tight); line-height: v
 }
 .modal-overlay.active { opacity: 1; visibility: visible; }
 
+/* Modal exclusivo: Personalizar Dupla */
+.modal-personalizar {
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.modal-personalizar .modal-sheet {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    max-height: 90dvh;
+    margin: 0;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border-radius: 24px 24px 0 0;
+}
+
+/* Animação de subida */
+.modal-personalizar.active .modal-sheet {
+    animation: subirPersonalizacao 0.3s ease-out;
+}
+
+@keyframes subirPersonalizacao {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+
 .modal-sheet {
   background: var(--bg-card); width: 100%; max-width: 560px;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
