@@ -1034,7 +1034,8 @@ document.getElementById('closeTutorProfile')?.addEventListener(
   'click',
   () => this.closeModal('modalTutorProfile')
 );
-
+document.getElementById('finishProfileBtn')
+    ?.addEventListener('click', () => App.finishProfileSetup());
 const tutorPhotoInput = document.getElementById('tutorPhotoInput');
 const customTutorAvatar = document.getElementById('customTutorAvatar');
 
