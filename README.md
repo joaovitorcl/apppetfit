@@ -2,7 +2,7 @@
 
 PWA de Gestão de Hábitos para **Pets e Tutores**.
 
-> **Versão atual:** 3.0 | **Gestures + Skeletons + Firebase-ready**
+> **Versão atual:** 4.0 | **Dark Mode + Microinterações + Tipografia Escalonável**
 
 ---
 
@@ -44,7 +44,7 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 
 ---
 
-### 👆 v3.0 — Gestures (ATUAL)
+### 👆 v3.0 — Gestures
 > *Navegação por gestos nativos de mobile*
 
 #### ⬇️ Pull-to-Refresh
@@ -55,7 +55,7 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 #### 👈👉 Swipe nos Cards de Hábito
 - **Deslize para a ESQUERDA** → Completa o hábito (abre modal de exercício)
 - **Deslize para a DIREITA** → Desmarca o hábito (se já estiver concluído)
-- Background colorido revela a ação durante o swipe (verde = completar, vermelho = desfazer)
+- Background colorido revela a ação durante o swipe
 - Snap automático com animação elástica
 
 #### 👆 Long-Press (Toque Longo)
@@ -75,17 +75,101 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 
 ---
 
-## 📁 Estrutura (3 arquivos principais)
+### 🌗 v4.0 — Dark Mode + Microinterações + Tipografia (ATUAL)
+> *Identidade de marca, conforto visual e feedback em cada toque*
+
+#### 🎨 Nova paleta de marca
+
+| Cor | Hex | Onde aparece |
+|---|---|---|
+| Verde-petróleo escuro | `#0E3032` | Fundo do tema escuro · texto principal no tema claro |
+| Verde-petróleo profundo | `#043F41` | Header (tema claro) · cards e barras (tema escuro) |
+| Azul-acinzentado | `#4994A9` | Hábito concluído · destaques secundários |
+| Âmbar | `#D8914F` | Botões, chip ativo, barra de progresso |
+| Ferrugem | `#8A441E` | Textos de destaque no tema claro · ação de excluir |
+
+- A paleta fica em um só lugar: variáveis `--pal-*` no topo do `style.css`. Trocou ali, trocou o app inteiro.
+- **Contraste verificado (WCAG AA)**: texto sobre o âmbar usa `#0E3032` (5,4:1) em vez de branco (2,6:1). No tema escuro, o texto de destaque usa um âmbar mais claro derivado da paleta.
+- Como a paleta não tem vermelho, ações destrutivas usam o ferrugem `#8A441E`.
+
+#### 🌙 Dark Mode Adaptativo
+- **3 modos**: Automático (acompanha o aparelho, inclusive quando ele muda no meio do uso), Claro e Escuro
+- **Botão rápido** ☾/☀ no topo + opção completa em **Ajustes**
+- Preferência salva no aparelho e aplicada **antes da primeira pintura** (sem "flash" branco ao abrir)
+- A barra de status do celular (`theme-color`) acompanha o tema
+- Troca com **revelação circular** a partir do botão tocado (View Transitions); em navegadores sem suporte, fade suave de cores
+- Fundo escuro `#0E3032`: tons escuros reduzem o consumo em telas OLED
+
+#### ✨ Microinterações Progressivas
+- **Check animado**: o ✓ é "desenhado" ao concluir, com pop e anel de onda no botão
+- **Confete e patinhas 🐾** ao concluir um hábito; **celebração extra ao bater 100%** do dia
+- **Reordenação animada (FLIP)**: o card concluído desliza até a nova posição
+- **Entrada em cascata** dos cards ao abrir, sincronizar ou trocar de filtro
+- **Contadores** animados (progresso, perfil e evolução) e **barras do histórico** que crescem
+- **Swipe com feedback progressivo**: só a ação da direção do dedo aparece, o ícone cresce até o limite, "arma" com vibração e volta com mola
+- **Excluir** com animação de saída; **campo vazio** balança (shake) com vibração
+- **Ripple** nos botões e chips; indicador da aba ativa desliza; ícone de energia dá um "pulinho" quando muda
+- **Sem dependências**: feito com CSS + Web Animations API. (Framer Motion é só para React e o Lottie exige arquivos `.json` + CDN; assim o app continua leve e offline.)
+- **Progressivo e acessível**: tudo respeita "Reduzir movimento" do sistema, e a revelação circular só existe onde o navegador suporta
+
+#### 🔤 Tipografia Escalonável e Hierárquica
+- **Escala fluida de 7 níveis** (`--fs-xs` → `--fs-3xl`) com `clamp()`: cresce suavemente de 320px a 480px de largura
+- **Hierarquia clara**: Display (progresso do dia em destaque) → Título → Subtítulo → Corpo → Metadados → Legendas
+- **Escalona de verdade**: base em `rem`, fonte do aparelho respeitada (`100%`) e **Ajustes → Tamanho do texto** (Padrão · Grande · Maior = 100% · 112,5% · 125%)
+- **Zoom liberado**: removido `user-scalable=no` do viewport
+- Menor texto subiu de 10px para **12px**; números tabulares, títulos balanceados e nomes de hábito em até 2 linhas (antes cortavam com "…")
+
+#### 🖼️ Logo no header
+- Ao lado de "PetFit Sync", dentro de um **quadrado branco com cantos levemente arredondados**: o PNG nunca fica estranho, em qualquer tema ou cor de fundo
+- Se o PNG não existir ou falhar, aparece 🐾 no lugar
+- Veja **"Como trocar o logo"** abaixo
+
+#### 🛠️ Correções (encontradas ao preparar a v4.0)
+- **Concluir & Marcar Hábito** não fechava o modal e contava o exercício em dobro: `renderAll()` chamava `renderStats()`, que não existia
+- **Salvar Perfil** travava (`saveProfile` chamava a si mesmo até estourar a pilha)
+- **Toque simples** num card abria o modal de exercício (swipe "fantasma")
+- O banner de gestos agora fecha e lembra a escolha
+
+---
+
+## 📁 Estrutura
 
 ```
 petfit-sync/
-├── index.html       ← Skeletons + Firebase SDK + Gesture areas
-├── style.css        ← Skeleton shimmer + Thumb Zone + Gesture styles
-├── script.js        ← DataLayer + SkeletonManager + GestureEngine + App
-├── manifest.json    ← PWA manifest
+├── index.html       ← Header com logo + botão de tema, modal de Ajustes
+├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações
+├── script.js        ← DataLayer + Skeletons + Gestures + Motion + ThemeManager + App
+├── manifest.json    ← PWA manifest (cores da marca)
 └── assets/
-    └── icons/       ← Placeholders (substitua por PNGs reais)
+    └── icons/
+        ├── logo.png         ← SEU LOGO do header (substitua este arquivo)
+        ├── Petfitlogo.png   ← Favicon
+        └── icon-*.svg       ← Placeholders (substitua por PNGs reais)
 ```
+
+---
+
+## 🖼️ Como trocar o logo
+
+No `index.html`, procure o comentário **"SEU LOGO"** no topo da página. A linha é esta:
+
+```html
+<img class="brand-logo-img" src="assets/icons/logo.png" alt="Logo PetFit" width="44" height="44" decoding="async">
+```
+
+Duas formas, escolha uma:
+1. **Sem mexer no código**: salve seu PNG em `assets/icons/` com o nome `logo.png` (substituindo o atual).
+2. **Com outro nome**: coloque o arquivo em `assets/icons/` e troque só o `src="..."` nessa linha.
+
+Dicas: use PNG quadrado (ideal 256×256 ou mais) e com pouca margem em branco ao redor, pois o logo aparece em 44px. O quadrado branco já é adicionado pelo app (classe `.brand-logo` no `style.css`).
+
+---
+
+## 🎛️ Tema e tamanho do texto
+
+- **Alternar rápido**: botão ☾/☀ no topo
+- **Ajustes** (aba inferior): Tema (Automático · Claro · Escuro) e Tamanho do texto (Padrão · Grande · Maior), com pré-visualização
+- As preferências ficam no aparelho (`petfit_theme` e `petfit_textScale` no `localStorage`)
 
 ---
 
@@ -110,10 +194,18 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 
 ---
 
-## ⚡ Funcionalidades Completas (v3.0)
+## ⚡ Funcionalidades Completas (v4.0)
 
 | Categoria | Feature | Status |
 |---|---|---|
+| **Visual** | Paleta de marca (5 cores) com contraste AA | ✅ |
+| **Visual** | Dark Mode adaptativo (Automático/Claro/Escuro) | ✅ |
+| **Visual** | Logo em quadrado branco no header | ✅ |
+| **Tipografia** | Escala fluida hierárquica (7 níveis) | ✅ |
+| **Tipografia** | Tamanho do texto ajustável + zoom liberado | ✅ |
+| **Microinterações** | Check animado, confete, celebração 100% | ✅ |
+| **Microinterações** | Reordenação animada, cascata, contadores | ✅ |
+| **Microinterações** | Ripple, shake, swipe com feedback progressivo | ✅ |
 | **Gestures** | Pull-to-Refresh | ✅ |
 | **Gestures** | Swipe Left/Right nos cards | ✅ |
 | **Gestures** | Long-Press menu de contexto | ✅ |
@@ -125,11 +217,17 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 | **Dados** | Reset diário automático | ✅ |
 | **Dados** | Histórico 7 dias com gráfico | ✅ |
 | **Dados** | Streak de dias consecutivos | ✅ |
-| **PWA** | Service Worker (offline) | ✅ |
+| **PWA** | Service Worker (offline) | ⚠️ pendente (veja a nota abaixo) |
 | **PWA** | Manifest + Ícones | ✅ |
 | **UX** | Haptic feedback | ✅ |
 | **UX** | Toast notifications | ✅ |
 | **UX** | Offline banner | ✅ |
+| **A11y** | Respeita "Reduzir movimento" e a fonte do sistema | ✅ |
+
+---
+
+### ⚠️ Nota sobre o modo offline
+O Service Worker é registrado a partir de um `Blob` dentro do `script.js`, e os navegadores **não aceitam** script `blob:` para Service Worker (aparece "Erro no SW" no console). Por isso o app funciona, mas ainda **não abre offline** nem é instalável com cache. Para ativar de verdade: mover o código do SW para um arquivo `sw.js` na raiz e registrar com `navigator.serviceWorker.register('sw.js')`. Foi deixado de fora da v4.0 de propósito: um cache offline faria o logo novo demorar a aparecer quando você trocar o PNG.
 
 ---
 

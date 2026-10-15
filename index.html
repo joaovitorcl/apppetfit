@@ -2,15 +2,16 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#f97316">
-  <meta name="background-color" content="#f8f6f1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#043F41">
+  <meta name="background-color" content="#0E3032">
   <meta name="description" content="PetFit Sync — Gestão de hábitos para pets e tutores. Conecte-se diariamente com saúde e movimento.">
+  <meta name="color-scheme" content="light dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PetFit Sync">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="msapplication-TileColor" content="#f97316">
+  <meta name="msapplication-TileColor" content="#043F41">
   <meta name="msapplication-TileImage" content="assets/icons/icon-192x192.png">
 
   <title>PetFit - Amizade dono e pet</title>
@@ -33,6 +34,21 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   -->
 
+  <!-- Aplica tema (claro/escuro/automático) e tamanho do texto antes da 1ª pintura, evitando "flash" branco -->
+  <script>
+    (function () {
+      var root = document.documentElement, dark = false;
+      try {
+        var pref = localStorage.getItem('petfit_theme') || 'auto';
+        dark = pref === 'dark' || (pref === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var scale = parseFloat(localStorage.getItem('petfit_textScale'));
+        if (scale >= 1 && scale <= 1.5) root.style.setProperty('--text-scale', scale);
+      } catch (e) {}
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#0E3032' : '#043F41');
+    })();
+  </script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -41,15 +57,27 @@
   <header class="app-header" id="appHeader">
     <div class="header-inner">
       <div class="brand">
-        <span class="brand-icon" href="assets/icons/logo.png"></span>
+        <!-- ╔═══════════════════════════════════════════════════════════════════════════╗
+             ║  SEU LOGO: troque só o caminho do PNG na linha <img> abaixo               ║
+             ║  (ou apenas substitua o arquivo assets/icons/logo.png pelo seu, sem mexer) ║
+             ╚═══════════════════════════════════════════════════════════════════════════╝ -->
+        <span class="brand-logo" id="brandLogo">
+          <img class="brand-logo-img" src="assets/icons/logo.png" alt="Logo PetFit" width="44" height="44" decoding="async">
+        </span>
         <div class="brand-text">
-          <h1>PetFit Sync</h1>
+          <h1>PetFit</h1>
           <span class="brand-tagline">Conexão diária em movimento</span>
         </div>
       </div>
-      <button class="btn-icon header-avatar-btn" id="btnProfile" aria-label="Perfil do pet">
-        <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Avatar do pet" class="header-avatar" id="headerAvatarImg">
-      </button>
+      <div class="header-actions">
+        <button class="btn-icon theme-toggle" id="btnTheme" type="button" aria-label="Ativar modo escuro">
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"/></svg>
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+        </button>
+        <button class="btn-icon header-avatar-btn" id="btnProfile" aria-label="Perfil do pet">
+          <img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rex&backgroundColor=ffdfbf" alt="Avatar do pet" class="header-avatar" id="headerAvatarImg">
+        </button>
+      </div>
     </div>
   </header>
 
@@ -212,6 +240,39 @@
       <span class="nav-icon">⚙️</span>
       <span class="nav-label">Ajustes</span>
     </button>
+  <button id="openAddProfile" type="button">
+    Personalizar Dupla
+</button>
+<!-- Modal: Personalizar Dupla -->
+<div class="modal-overlay" id="modalAddProfile">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+
+        <div class="modal-header">
+            <h2>Personalizar Perfil da Dupla</h2>
+
+            <button
+                class="btn-icon modal-close"
+                id="closeAddProfile"
+                type="button"
+                aria-label="Fechar">
+                <span>✕</span>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="profileTitle">Nome do Pet</label>
+                <input
+                    type="text"
+                    id="profileTitle"
+                    placeholder="Ex.: Rex"
+                    autocomplete="off">
+            </div>
+        </div>
+    </div>
+</div>
+
   </nav>
 
   <!-- ==================== MODAIS ==================== -->
@@ -360,8 +421,55 @@
     </div>
   </div>
 
+  <!-- Modal: Ajustes (tema + tamanho do texto) -->
+  <div class="modal-overlay" id="modalSettings">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Ajustes</h2>
+        <button class="btn-icon modal-close" id="closeSettings" aria-label="Fechar">
+          <span>✕</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <section class="settings-group">
+          <h3 class="settings-title">Aparência</h3>
+          <p class="settings-desc">“Automático” acompanha o tema do seu aparelho. O modo escuro economiza bateria em telas OLED.</p>
+          <div class="segmented" id="themeSegment" role="radiogroup" aria-label="Tema" style="--n:3">
+            <span class="segmented-thumb" aria-hidden="true"></span>
+            <button type="button" role="radio" data-value="auto"><span class="seg-emoji">🌗</span>Automático</button>
+            <button type="button" role="radio" data-value="light"><span class="seg-emoji">☀️</span>Claro</button>
+            <button type="button" role="radio" data-value="dark"><span class="seg-emoji">🌙</span>Escuro</button>
+          </div>
+        </section>
+        <section class="settings-group">
+          <h3 class="settings-title">Tamanho do texto</h3>
+          <p class="settings-desc">Ajuste a leitura do app inteiro. Ele também respeita a fonte configurada no seu aparelho.</p>
+          <div class="segmented" id="textScaleSegment" role="radiogroup" aria-label="Tamanho do texto" style="--n:3">
+            <span class="segmented-thumb" aria-hidden="true"></span>
+            <button type="button" role="radio" data-value="1"><span class="seg-emoji" style="font-size:1rem">Aa</span>Padrão</button>
+            <button type="button" role="radio" data-value="1.125"><span class="seg-emoji" style="font-size:1.25rem">Aa</span>Grande</button>
+            <button type="button" role="radio" data-value="1.25"><span class="seg-emoji" style="font-size:1.5rem">Aa</span>Maior</button>
+          </div>
+          <div class="type-preview" aria-hidden="true">
+            <p class="type-preview-title">Passeio matinal</p>
+            <p class="type-preview-text">Texto de leitura: o título se destaca do resto.</p>
+            <p class="type-preview-caption">Passeio · 09:00</p>
+          </div>
+          <div>
+      
+          </div>
+        </section>
+        <p class="settings-version">PetFit v4.0</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary btn-full" id="closeSettingsBtn">Pronto</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notifications -->
-  <div class="toast-container" id="toastContainer"></div>
+  <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
 
   <!-- Offline Banner -->
   <div class="offline-banner" id="offlineBanner">
