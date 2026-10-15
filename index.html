@@ -293,38 +293,102 @@
 
         <div class="modal-body">
             <div class="form-group">
-                <label for="profileTitle">Nome do Pet</label>
+                <label for="setupPetName">Nome do Pet</label>
                 <input
                     type="text"
-                    id="profileTitle"
+                    id="setupPetName"
                     placeholder="Ex.: Rex..."
                     autocomplete="off">
             </div>
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <label for="profileTitle">Especie do Pet</label>
+                <label for="setupPetSpecies">Especie do Pet</label>
                 <input
                     type="text"
-                    id="profileTitle"
+                    id="setupPetSpecies"
                     placeholder="Ex.: Gato, Cachorro..."
                     autocomplete="off">
             </div>
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <label for="profileTitle">Raça</label>
+                <label for="setupPetBreed">Raça</label>
                 <input
                     type="text"
-                    id="profileTitle"
+                    id="setupPetBreed"
                     placeholder="Ex.: Pinscher..."
                     autocomplete="off">
             </div>
             <div class="modal-footer">
-        <button class="btn-primary btn-full" id="saveHabitBtn">Salvar Pet</button>
+        <button class="btn-primary btn-full" id="savePetBtn">Salvar Pet</button>
       </div>
         </div>
     </div>
+</div>
+
+
+<!-- Modal: Personalizar Tutor - Etapa 2 -->
+<div class="modal-overlay modal-personalizar" id="modalTutorProfile">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+
+    <div class="modal-header">
+      <h2>Personalizar Tutor</h2>
+      <button
+        class="btn-icon modal-close"
+        id="closeTutorProfile"
+        type="button"
+        aria-label="Fechar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="pet-avatar-editor">
+        <img
+          src="./assets/icons/iconavatar1.png"
+          alt="Foto do tutor"
+          id="customTutorAvatar"
+          class="custom-pet-avatar"
+        >
+
+        <label for="tutorPhotoInput" class="pet-avatar-button">
+          📷 Escolher foto
+        </label>
+
+        <input
+          type="file"
+          id="tutorPhotoInput"
+          accept="image/*"
+          hidden
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="tutorNameInput">Nome do tutor</label>
+        <input
+          type="text"
+          id="tutorNameInput"
+          placeholder="Digite seu nome"
+          autocomplete="name"
+        >
+      </div>
+
+      <p>Quase pronto! Agora vamos finalizar o perfil da sua dupla.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn-primary btn-full"
+        id="finishProfileBtn"
+        type="button"
+      >
+        Finalizar cadastro
+      </button>
+    </div>
+  </div>
 </div>
 
   </nav>

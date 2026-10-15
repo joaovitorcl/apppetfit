@@ -617,21 +617,21 @@ const App = {
   renderAll() { this.renderHeader(); this.renderDashboard(); this.renderHabits(); },
 
  
+
 renderHeader() {
-  const avatar = this.profile?.avatar || './assets/icons/iconpet1.png';
+  const petAvatar =
+    this.profile.avatar || './assets/icons/iconpet1.png';
 
-  const imageIds = [
-    'headerAvatarImg',
-    'profileAvatarImg',
-    'customPetAvatar'
-  ];
+  const tutorAvatar =
+    this.profile.tutorAvatar || './assets/icons/iconavatar1.png';
 
-  imageIds.forEach(id => {
-    const img = document.getElementById(id);
-    if (img) {
-      img.src = avatar;
-    }
-  });
+  const headerImg = document.getElementById('headerAvatarImg');
+  const profilePetImg = document.getElementById('profileAvatarImg');
+  const profileTutorImg = document.getElementById('tutorAvatarImg');
+
+  if (headerImg) headerImg.src = petAvatar;
+  if (profilePetImg) profilePetImg.src = petAvatar;
+  if (profileTutorImg) profileTutorImg.src = tutorAvatar;
 },
 
 
@@ -899,6 +899,71 @@ async openProfile() {
     this.openModal('modalStats');
   },
 
+async savePetStep() {
+  const petName = document.getElementById('setupPetName').value.trim();
+  const petSpecies = document.getElementById('setupPetSpecies').value.trim();
+  const petBreed = document.getElementById('setupPetBreed').value.trim();
+
+  if (!petName || !petSpecies) {
+    alert('Preencha o nome e a espécie do pet.');
+    return;
+  }
+
+  this.profile.petName = petName;
+  this.profile.petSpecies = petSpecies;
+  this.profile.petBreed = petBreed;
+
+  const petImage = document.getElementById('customPetAvatar');
+
+  if (petImage?.src && petImage.src.startsWith('data:image/')) {
+    this.profile.avatar = petImage.src;
+  }
+
+  await this.persistProfile();
+
+  this.closeModal('modalAddProfile');
+  document.getElementById('tutorNameInput').value =
+    this.profile.tutorName === 'Tutor' ? '' : this.profile.tutorName;
+
+  const tutorImage = document.getElementById('customTutorAvatar');
+  if (tutorImage) {
+    tutorImage.src =
+      this.profile.tutorAvatar || './assets/icons/iconavatar1.png';
+  }
+
+  this.openModal('modalTutorProfile');
+},
+
+async finishProfileSetup() {
+  const tutorName = document.getElementById('tutorNameInput').value.trim();
+
+  if (!tutorName) {
+    alert('Digite o nome do tutor.');
+    return;
+  }
+
+  this.profile.tutorName = tutorName;
+
+  const tutorImage = document.getElementById('customTutorAvatar');
+
+  if (tutorImage?.src && tutorImage.src.startsWith('data:image/')) {
+    this.profile.tutorAvatar = tutorImage.src;
+  }
+
+  await this.persistProfile();
+
+  this.closeModal('modalTutorProfile');
+  this.renderHeader();
+
+  const profileTutorImage = document.getElementById('tutorAvatarImg');
+  if (profileTutorImage) {
+    profileTutorImage.src =
+      this.profile.tutorAvatar || './assets/icons/iconavatar1.png';
+  }
+
+  this.showToast('🐾 Perfil da dupla salvo!', 'success');
+},
+
   renderHistoryBars() {
     const container = document.getElementById('historyBars');
     const history = this.history.slice(-7);
@@ -1069,3 +1134,40 @@ if (petPhotoInput) {
 };
 
 document.addEventListener('DOMContentLoaded', ()=>{ App.init(); });
+
+document.getElementById('savePetBtn').addEventListener(
+  'click',
+  () => this.savePetStep()
+);
+
+document.getElementById('finishProfileBtn').addEventListener(
+  'click',
+  () => this.finishProfileSetup()
+);
+
+document.getElementById('closeTutorProfile').addEventListener(
+  'click',
+  () => this.closeModal('modalTutorProfile')
+);
+
+const tutorPhotoInput = document.getElementById('tutorPhotoInput');
+const customTutorAvatar = document.getElementById('customTutorAvatar');
+
+tutorPhotoInput.addEventListener('change', () => {
+  const file = tutorPhotoInput.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert('Selecione uma imagem válida.');
+    tutorPhotoInput.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = event => {
+    customTutorAvatar.src = event.target.result;
+  };
+
+  reader.readAsDataURL(file);
+});
