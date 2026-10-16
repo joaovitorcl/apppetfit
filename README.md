@@ -2,11 +2,24 @@
 
 PWA de Gestão de Hábitos para **Pets e Tutores**.
 
-> **Versão atual:** 5.0 | **Personalização do perfil do pet e do tutor**
+> **Versão atual:** 6.0 | **Exercícios por categoria com vídeo-tutorial no YouTube**
 
 ---
 
 ## 📜 Histórico de Versões
+
+### 🎬 v6.0 — Exercícios com Vídeo-Tutorial
+> *Exercícios pensados para o momento de cada tarefa, com ajuda em vídeo a um toque*
+
+- ✅ **Banco de exercícios revisado**: 42 exercícios (6 por categoria), escolhidos para fazer sentido durante a tarefa — parado na cozinha na **alimentação**, aproveitando as pausas do pet no **passeio**, calmos e silenciosos na **medicação**, sem saltos na **higiene** (piso molhado), e assim por diante.
+- ✅ **Filtro por categoria**: cada exercício vem das mesmas 7 categorias dos hábitos (alimentação, passeio, medicação, escovação, brincadeira, higiene e outro).
+- ✅ **Ajuda discreta no modal do exercício**: logo abaixo do exercício aparece *"Não sabe realizar? Veja esse vídeo no YouTube!"* com o botão **▶ Ver vídeo**, que abre o tutorial em outra aba (o modal continua aberto para você voltar e concluir o hábito).
+- ✅ **20 vídeos em português**, um por tipo de exercício (agachamento, prancha, polichinelo, mobilidade de ombros etc.). Exercícios parecidos de categorias diferentes compartilham o mesmo vídeo.
+- ✅ **Sem repetir seguido**: o mesmo exercício não aparece duas vezes em sequência na mesma categoria.
+- ✅ **Acessível e fiel ao tema**: botão com área de toque ≥ 48px, `aria-label` com o nome do exercício, e cores que acompanham o tema claro/escuro.
+- ✅ **Fácil de manter**: para trocar um vídeo, basta mudar o `id` em `ExerciseVideos` no `script.js` (veja **"Como trocar um vídeo"** abaixo).
+
+---
 
 ### 🐾 v5.0 — Personalização do Perfil
 > *Personalização da identidade visual da dupla pet + tutor*
@@ -147,9 +160,9 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 
 ```
 petfit-sync/
-├── index.html       ← Header com logo + botão de tema, modal de Ajustes
+├── index.html       ← Header com logo + botão de tema, modal de Ajustes, modal de exercício com botão de vídeo
 ├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações
-├── script.js        ← DataLayer + Skeletons + Gestures + Motion + ThemeManager + App
+├── script.js        ← DataLayer + ExerciseVideos/ExerciseDB + Skeletons + Gestures + Motion + ThemeManager + App
 ├── manifest.json    ← PWA manifest (cores da marca)
 └── assets/
     └── icons/
@@ -157,6 +170,32 @@ petfit-sync/
         ├── Petfitlogo.png   ← Favicon
         └── icon-*.svg       ← Placeholders (substitua por PNGs reais)
 ```
+
+---
+
+## 🎬 Como trocar um vídeo
+
+No `script.js`, procure `ExerciseVideos`. Cada tipo de exercício tem um `id`, que é o trecho depois de `watch?v=` na URL do YouTube:
+
+```js
+panturrilha: { nome: 'Elevação de panturrilha', id: 'fymX9oQ8IRM' },
+//                                                  └─ https://www.youtube.com/watch?v=fymX9oQ8IRM
+```
+
+Trocou o `id` ali, trocou o vídeo em **todos** os exercícios que usam esse tipo.
+
+Para **adicionar um exercício**, inclua um item na categoria desejada em `ExerciseDB`:
+
+```js
+alimentacao: [
+  { text: "Faça 10 agachamentos enquanto prepara a ração", video: 'agachamento' },
+  // ...
+]
+```
+
+O campo `video` aponta para uma chave de `ExerciseVideos`. Se a chave não existir, o bloco "Não sabe realizar?" simplesmente não aparece.
+
+> ⚠️ Vídeos do YouTube podem ser removidos ou ficar privados pelo autor. Vale testar os links de vez em quando.
 
 ---
 
@@ -205,10 +244,12 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 
 ---
 
-## ⚡ Funcionalidades Completas (v5.0)
+## ⚡ Funcionalidades Completas (v6.0)
 
 | Categoria | Feature | Status |
 |---|---|---|
+| **Exercícios** | 42 exercícios filtrados por categoria do hábito | ✅ |
+| **Exercícios** | Botão discreto "Ver vídeo" (YouTube) abaixo do exercício | ✅ |
 | **Visual** | Paleta de marca (5 cores) com contraste AA | ✅ |
 | **Visual** | Dark Mode adaptativo (Automático/Claro/Escuro) | ✅ |
 | **Visual** | Logo em quadrado branco no header | ✅ |

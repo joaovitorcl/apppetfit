@@ -1,9 +1,10 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- *  PETFIT SYNC v4.0 — script.js
+ *  PETFIT SYNC v6.0 — script.js
  *  PWA de Gestão de Hábitos para Pets e Tutores
  *  Features: Skeletons | DataLayer | Gestures (Pull, Swipe, Long-Press)
  *            + Dark Mode Adaptativo | Microinterações | Tipografia Escalonável
+ *            + Exercícios por categoria com vídeo-tutorial no YouTube (v6.0)
  *  ═══════════════════════════════════════════════════════════════
  */
 
@@ -93,14 +94,103 @@ const DataLayer = {
 // ═══════════════════════════════════════════════════════════════
 //  SEÇÃO 3: EXERCÍCIOS
 // ═══════════════════════════════════════════════════════════════
+/**
+ * Biblioteca de vídeos (YouTube) — um por TIPO de exercício.
+ * Vários exercícios/categorias podem apontar para o mesmo vídeo.
+ * Para trocar um vídeo, mude só o `id` (o trecho depois de "watch?v=" na URL).
+ */
+const ExerciseVideos = {
+  agachamento:    { nome: 'Agachamento',                id: 'bxq2eVZl9nY' },
+  agachamentoIso: { nome: 'Agachamento isométrico',     id: '9SykC08Be-I' },
+  parede:         { nome: 'Agachamento na parede',      id: 'zyg4o-91JrY' },
+  afundo:         { nome: 'Afundo alternado',           id: 'gFzol9TFkGM' },
+  panturrilha:    { nome: 'Elevação de panturrilha',    id: 'fymX9oQ8IRM' },
+  polichinelo:    { nome: 'Polichinelo',                id: 'S2uqQ9zHZMc' },
+  corda:          { nome: 'Pular corda imaginária',     id: 'VeVuFwdJf-M' },
+  joelhos:        { nome: 'Corrida parada, joelho alto', id: 'fnv5fgl03Oo' },
+  tiros:          { nome: 'Tiros de corrida',           id: 'ckADsFBJ4jo' },
+  caminhada:      { nome: 'Caminhada acelerada',        id: 'DoPDU149KvU' },
+  escada:         { nome: 'Subir escadas',              id: 'Wsm9NBIjQyI' },
+  prancha:        { nome: 'Prancha',                    id: 'Yu0wjtD5FkU' },
+  flexao:         { nome: 'Flexão de braço',            id: 'Azw6BZ8-wSM' },
+  abdominal:      { nome: 'Abdominal',                  id: 'w08qG9nQZ_Q' },
+  ombros:         { nome: 'Mobilidade de ombros',       id: 'kycQbO08Pg4' },
+  punhos:         { nome: 'Mobilidade de punhos',       id: 'S1BqYYaZz3Y' },
+  tornozelo:      { nome: 'Mobilidade de tornozelo',    id: 'hUc-BV3tQP8' },
+  tronco:         { nome: 'Rotação de tronco',          id: 'ecdia5Nyjvs' },
+  lateral:        { nome: 'Alongamento lateral',        id: 'uesSifgbdpI' },
+  alongamento:    { nome: 'Alongamento em pé',          id: 'Ty5kwQgXUrI' }
+};
+const youtubeUrl = id => 'https://www.youtube.com/watch?v=' + id;
+
+/**
+ * Exercícios por categoria de hábito (mesmas categorias do app).
+ * Cada item: { text: frase mostrada, video: chave de ExerciseVideos }.
+ * Critério: o exercício precisa caber no momento da tarefa
+ *  · alimentação  → parado na cozinha, enquanto o pet come
+ *  · passeio      → ao ar livre, aproveitando as pausas do pet
+ *  · medicação    → calmo e silencioso (o pet precisa ficar tranquilo)
+ *  · escovação    → postura em pé/agachado, mãos e punhos em uso
+ *  · brincadeira  → dinâmico, junto com o pet
+ *  · higiene      → sem saltos (piso molhado e escorregadio)
+ */
 const ExerciseDB = {
-  alimentacao: ["Enquanto prepara a ração, faça 15 agachamentos","Segure a vasilha com os braços estendidos por 20 segundos","Faça 10 polichinelos enquanto o pet come","Fique na ponta dos pés por 30 segundos","Faça 12 elevações de panturrilha esperando o pet terminar","Rode os ombros 15 vezes para trás e para frente"],
-  passeio: ["Durante o passeio, faça 3 tiros curtos de corrida de 20 segundos","A cada esquina, faça 5 polichinelos","Suba e desça uma escada 2 vezes","Faça caminhada acelerada por 2 minutos","Pare e faça 10 agachamentos em um ponto do percurso","Levante os joelhos alternadamente por 30 segundos"],
-  medicacao: ["Enquanto prepara o remédio, faça 10 rotações de ombros","Segure a posição de prancha por 20 segundos","Faça 8 flexões de braço no chão","Gire o tronco 10 vezes para cada lado","Faça 12 abdominais curtos","Estique os braços para cima e segure por 15 segundos"],
-  escovacao: ["Faça agachamento isométrico enquanto escova o pet (30s)","Levante os calcanhares 15 vezes","Contraia o abdômen por 20 segundos","Faça 10 elevações de panturrilha","Rode os punhos 10 vezes em cada sentido","Incline o tronco para os lados 8 vezes cada"],
-  brincadeira: ["Corra junto com o pet por 1 minuto","Faça 20 jumping jacks","Deite e levante 10 vezes","Faça 15 abdominais","Pule corda imaginária por 30 segundos","Faça 12 lunges alternados"],
-  higiene: ["Enquanto prepara o banho, faça 10 agachamentos","Segure a posição de parede sentada por 20 segundos","Faça 15 rotações de tornozelo","Estique a coluna: braços para cima, segure 15s","Faça 10 polichinelos entre uma etapa e outra","Contraia o glúteo por 15 segundos de cada lado"],
-  outro: ["Faça 10 agachamentos","Segure prancha por 30 segundos","Faça 15 polichinelos","Gire os braços 20 vezes","Levante os calcanhares 20 vezes","Faça 12 flexões de braço"]
+  alimentacao: [
+    { text: "Enquanto prepara a ração, faça 15 agachamentos", video: 'agachamento' },
+    { text: "Enquanto o pet come, faça 12 elevações de panturrilha", video: 'panturrilha' },
+    { text: "Encoste na parede e segure o agachamento por 30 segundos", video: 'parede' },
+    { text: "Faça 10 polichinelos enquanto o pet come", video: 'polichinelo' },
+    { text: "Rode os ombros 15 vezes para trás e para frente", video: 'ombros' },
+    { text: "Estique os braços para cima e alongue por 20 segundos", video: 'alongamento' }
+  ],
+  passeio: [
+    { text: "Durante o passeio, faça 3 tiros curtos de corrida de 20 segundos", video: 'tiros' },
+    { text: "Faça caminhada acelerada por 2 minutos", video: 'caminhada' },
+    { text: "Suba e desça uma escada 2 vezes", video: 'escada' },
+    { text: "Enquanto o pet fareja, faça 12 afundos alternados", video: 'afundo' },
+    { text: "Em um ponto seguro do percurso, faça 10 agachamentos", video: 'agachamento' },
+    { text: "Levante os joelhos alternadamente por 30 segundos", video: 'joelhos' }
+  ],
+  medicacao: [
+    { text: "Enquanto prepara o remédio, faça 10 rotações de ombros", video: 'ombros' },
+    { text: "Gire o tronco 10 vezes para cada lado", video: 'tronco' },
+    { text: "Estique os braços para cima e segure por 15 segundos", video: 'alongamento' },
+    { text: "Depois de medicar, segure a prancha por 20 segundos", video: 'prancha' },
+    { text: "Depois de medicar, faça 8 flexões de braço no chão", video: 'flexao' },
+    { text: "Depois de medicar, faça 12 abdominais curtos", video: 'abdominal' }
+  ],
+  escovacao: [
+    { text: "Faça agachamento isométrico enquanto escova o pet (30s)", video: 'agachamentoIso' },
+    { text: "Levante os calcanhares 15 vezes enquanto escova", video: 'panturrilha' },
+    { text: "Rode os punhos 10 vezes em cada sentido", video: 'punhos' },
+    { text: "Incline o tronco para os lados 8 vezes cada", video: 'lateral' },
+    { text: "Faça 10 círculos com cada tornozelo", video: 'tornozelo' },
+    { text: "Antes de começar, faça 10 rotações de ombros", video: 'ombros' }
+  ],
+  brincadeira: [
+    { text: "Corra junto com o pet por 1 minuto", video: 'tiros' },
+    { text: "Faça 20 polichinelos", video: 'polichinelo' },
+    { text: "Pule corda imaginária por 30 segundos", video: 'corda' },
+    { text: "Faça 12 afundos alternados", video: 'afundo' },
+    { text: "Faça 10 agachamentos", video: 'agachamento' },
+    { text: "Faça 15 abdominais", video: 'abdominal' }
+  ],
+  higiene: [
+    { text: "Enquanto prepara o banho, faça 10 agachamentos", video: 'agachamento' },
+    { text: "Segure a posição de parede sentada por 20 segundos", video: 'parede' },
+    { text: "Faça 15 elevações de panturrilha", video: 'panturrilha' },
+    { text: "Faça 10 círculos com cada tornozelo", video: 'tornozelo' },
+    { text: "Gire o tronco 10 vezes para cada lado", video: 'tronco' },
+    { text: "Estique a coluna: braços para cima, segure 15s", video: 'alongamento' }
+  ],
+  outro: [
+    { text: "Faça 10 agachamentos", video: 'agachamento' },
+    { text: "Segure prancha por 30 segundos", video: 'prancha' },
+    { text: "Faça 15 polichinelos", video: 'polichinelo' },
+    { text: "Gire os braços 20 vezes", video: 'ombros' },
+    { text: "Levante os calcanhares 20 vezes", video: 'panturrilha' },
+    { text: "Faça 12 flexões de braço", video: 'flexao' }
+  ]
 };
 const ExerciseEmojis = ['🏃','🤸','💪','🧘','⚡','🔥','🦵','🏋️','⛹️','🤾'];
 
@@ -545,7 +635,7 @@ const GestureEngine = {
 // ═══════════════════════════════════════════════════════════════
 const App = {
   habits:[], profile:{petName:'Rex', tutorName:'Tutor', avatar:'./assets/icons/iconpet1.png'},
-  history:[], exercisesDone:0, currentFilter:'all', pendingHabitId:null, pendingHabitAction:null, isLoading:false, gestureHintShown:false,
+  history:[], exercisesDone:0, currentFilter:'all', pendingHabitId:null, pendingHabitAction:null, currentExercise:null, isLoading:false, gestureHintShown:false,
   animateList:false, justCompletedId:null, _shownPercent:undefined,
 
   async init() {
@@ -786,15 +876,38 @@ renderHeader() {
     setTimeout(()=>{ this.pendingHabitId=newHabit.id; this.pendingHabitAction='complete'; this.showExerciseModal(newHabit); }, 400);
   },
 
-  getRandomExercise(category) { const list=ExerciseDB[category]||ExerciseDB.outro; return list[Math.floor(Math.random()*list.length)]; },
+  getRandomExercise(category) {
+    const list = ExerciseDB[category] || ExerciseDB.outro;
+    // evita repetir o mesmo exercício duas vezes seguidas
+    let pick = list[Math.floor(Math.random()*list.length)];
+    if(list.length > 1 && this.currentExercise && pick.text === this.currentExercise.text) {
+      pick = list[(list.indexOf(pick) + 1) % list.length];
+    }
+    return pick;
+  },
   getRandomEmoji() { return ExerciseEmojis[Math.floor(Math.random()*ExerciseEmojis.length)]; },
 
   showExerciseModal(habit) {
     document.getElementById('exerciseEmoji').textContent = this.getRandomEmoji();
     document.getElementById('exerciseTitle').textContent = 'Hora de se mexer, '+this.profile.tutorName+'!';
     document.getElementById('exerciseText').textContent = 'Você está prestes a completar "'+habit.title+'" com '+this.profile.petName+'.';
-    document.getElementById('exerciseSuggestion').textContent = this.getRandomExercise(habit.category);
+    const exercise = this.getRandomExercise(habit.category);
+    this.currentExercise = exercise;
+    document.getElementById('exerciseSuggestion').textContent = exercise.text;
+    this.renderExerciseVideo(exercise);
     this.openModal('modalExercise');
+  },
+
+  /** Mostra (ou esconde) a ajuda discreta "Não sabe realizar?" com o link do vídeo */
+  renderExerciseVideo(exercise) {
+    const box = document.getElementById('exerciseHelp');
+    const link = document.getElementById('exerciseVideoLink');
+    if(!box || !link) return;
+    const video = exercise && ExerciseVideos[exercise.video];
+    if(!video) { box.hidden = true; link.removeAttribute('href'); return; }
+    link.href = youtubeUrl(video.id);
+    link.setAttribute('aria-label', 'Ver vídeo de como fazer: ' + video.nome + ' (abre o YouTube em outra aba)');
+    box.hidden = false;
   },
 
   async completeExerciseAndHabit() {
@@ -1165,6 +1278,7 @@ if (petPhotoInput) {
     document.getElementById('saveProfileBtn').addEventListener('click', ()=>this.saveProfile());
     document.getElementById('dismissExercise').addEventListener('click', ()=>this.dismissExercise());
     document.getElementById('doneExercise').addEventListener('click', ()=>this.completeExerciseAndHabit());
+    document.getElementById('exerciseVideoLink').addEventListener('click', ()=>Motion.haptic(10));
     document.querySelectorAll('.nav-item').forEach(item=>item.addEventListener('click', ()=>this.switchTab(item.dataset.tab)));
     document.querySelectorAll('.filter-chip').forEach(chip=>chip.addEventListener('click', (e)=>{
       document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
