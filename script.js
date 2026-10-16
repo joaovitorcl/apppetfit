@@ -1079,6 +1079,29 @@ if (tutorPhotoInput && customTutorAvatar) {
     document.getElementById('openAddProfile').addEventListener('click', () => {this.openModal('modalAddProfile');});
     document.getElementById('closeAddProfile').addEventListener('click', () => {this.closeModal('modalAddProfile');});
     
+      document.getElementById('resetDuoBtn')?.addEventListener('click', () => {
+        const confirmar = confirm(
+          'Tem certeza que deseja apagar os dados da dupla e voltar ao padrão? Essa ação não pode ser desfeita.'
+        );
+
+        if (!confirmar) return;
+
+        // Remove somente os dados relacionados ao aplicativo
+        const chaves = [
+          'petfit_habits',
+          'petfit_profile',
+          'petfit_history',
+          'petfit_exercises',
+          'petfit_lastDate',
+          'petfit_gestureHint'
+        ];
+
+        chaves.forEach(chave => localStorage.removeItem(chave));
+
+        // Recarrega o aplicativo para inicializar os valores padrão
+        window.location.reload();
+      });
+
     
 const petPhotoInput = document.getElementById('petPhotoInput');
 
