@@ -2,11 +2,22 @@
 
 PWA de Gestão de Hábitos para **Pets e Tutores**.
 
-> **Versão atual:** 4.0 | **Dark Mode + Microinterações + Tipografia Escalonável**
+> **Versão atual:** 5.0 | **Personalização do perfil do pet e do tutor**
 
 ---
 
 ## 📜 Histórico de Versões
+
+### 🐾 v5.0 — Personalização do Perfil
+> *Personalização da identidade visual da dupla pet + tutor*
+
+- ✅ **Perfil personalizado da dupla**: exibição das informações do pet e do tutor em uma única seção.
+- ✅ **Foto do pet no cabeçalho**: o ícone superior passa a representar o pet cadastrado.
+- ✅ **Fotos e nomes no perfil**: apresentação das fotos e dos nomes do pet e do tutor, junto das estatísticas existentes.
+- ✅ **Nomes somente para visualização no perfil**: os campos de nome não permitem edição direta nessa tela.
+- ✅ **Persistência local**: suporte ao armazenamento das informações e da foto do perfil no `localStorage`.
+
+---
 
 ### 🚀 v1.0 — Fundação
 > *Lançamento inicial com conceito Thumb-Friendly*
@@ -75,7 +86,7 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 
 ---
 
-### 🌗 v4.0 — Dark Mode + Microinterações + Tipografia (ATUAL)
+### 🌗 v4.0 — Dark Mode + Microinterações + Tipografia
 > *Identidade de marca, conforto visual e feedback em cada toque*
 
 #### 🎨 Nova paleta de marca
@@ -194,7 +205,7 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 
 ---
 
-## ⚡ Funcionalidades Completas (v4.0)
+## ⚡ Funcionalidades Completas (v5.0)
 
 | Categoria | Feature | Status |
 |---|---|---|
