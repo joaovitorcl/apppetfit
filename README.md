@@ -2,11 +2,26 @@
 
 PWA de Gestão de Hábitos para **Pets e Tutores**.
 
-> **Versão atual:** 6.0 | **Exercícios por categoria com vídeo-tutorial no YouTube**
+> **Versão atual:** 7.0 | **Exercícios ligados ao contexto de cada tarefa, com vídeo-tutorial no YouTube**
 
 ---
 
 ## 📜 Histórico de Versões
+
+### 🧭 v7.0 — Exercícios que combinam com a tarefa
+> *O exercício sugerido nunca atrapalha o que você está fazendo com o pet*
+
+- ✅ **Exercícios ligados ao contexto**: o app agora escolhe o exercício pela **categoria**, pelo **título** e pelo **horário** do hábito, e não só pela categoria. Quem anda com o cachorro recebe exercícios de pé, com uma mão livre para a guia; quem dá banho recebe exercícios sem salto, por causa do piso molhado.
+- ✅ **77 exercícios** (eram 42), organizados nas 7 categorias do app: Alimentação, Passeio, Medicação, Escovação, Brincadeira, Higiene e Outro.
+- ✅ **Etiqueta de momento** no cartão do exercício: *"🦮 Durante o passeio"*, *"💊 Depois da medicação"*, *"🍖 Antes da alimentação"*. Cada exercício diz **quando** fazer em relação à tarefa (antes, durante ou depois).
+- ✅ **Subcontextos pelo título do hábito**: palavras no título ativam exercícios específicos. Exemplos: *"Passeio no parque"* libera tiros de corrida em área segura; *"Troca de água"* sugere agachar ao colocar o bebedouro; *"Brincar de bola"* sugere agachar a cada arremesso; *"Limpar caixa de areia"* sugere agachar com as costas retas. A tabela completa está em **"Como os exercícios são escolhidos"**.
+- ✅ **Regra de horário**: hábitos à noite (a partir das 19h, antes das 6h, ou com "noite"/"noturno" no título) não recebem polichinelos, pulos, tiros de corrida nem escadas, por causa do barulho e da pouca luz.
+- ✅ **Dica de segurança no lugar certo**: a frase em itálico abaixo do exercício agora é específica da tarefa (ex.: *"Nunca enrole a guia na mão e corra só onde não há trânsito"*), e não mais uma dica genérica.
+- ✅ **7 vídeos novos** (27 no total): equilíbrio em um pé só, respiração diafragmática, alongamento de pescoço, gato-camelo, alongamento de panturrilha, de quadríceps e de posterior de coxa.
+- ✅ **Exercícios de alongamento e relaxamento**: depois do passeio e da brincadeira entram alongamentos das pernas; antes de medicar ou cortar as unhas entram respiração e aquecimento de punhos, para deixar as mãos firmes e o pet mais calmo.
+- ✅ **Sem repetição seguida**: o mesmo exercício não aparece duas vezes em sequência.
+
+---
 
 ### 🎬 v6.0 — Exercícios com Vídeo-Tutorial
 > *Exercícios pensados para o momento de cada tarefa, com ajuda em vídeo a um toque*
@@ -173,6 +188,46 @@ petfit-sync/
 
 ---
 
+## 🧭 Como os exercícios são escolhidos
+
+A escolha acontece em `ExerciseEngine.pick()`, no `script.js`, em quatro passos:
+
+1. **Categoria**: usa só os exercícios da categoria do hábito.
+2. **Horário**: se o hábito é noturno, remove os exercícios marcados com `noite: false`.
+3. **Título**: procura palavras-chave no título e ativa os subcontextos correspondentes.
+4. **Sorteio**: com subcontexto ativo, sorteia entre os exercícios específicos (70% das vezes) ou entre os gerais da categoria; sem subcontexto, sorteia entre os gerais. Nunca repete o exercício anterior.
+
+### O que cada categoria prioriza
+
+| Categoria | Cuidado com a tarefa | Exemplos de exercício |
+|---|---|---|
+| 🍖 **Alimentação** | Silencioso, perto da bancada, sem assustar o pet que come | Agachar ao pegar o pote, equilíbrio num pé só, elevação de panturrilha |
+| 🦮 **Passeio** | De pé, uma mão livre para a guia, nada no chão | Tornozelos ao colocar a guia, afundos quando o pet fareja, agachar ao recolher o cocô, alongar as pernas ao chegar |
+| 💊 **Medicação** | Calmo antes da dose; o que cansa fica para depois | Respiração lenta, rotação de ombros, depois prancha e flexões |
+| 🪮 **Escovação** | Poupa costas, punhos e ombros, que trabalham na tarefa | Aquecer punhos e ombros, gato-camelo depois |
+| 🎾 **Brincadeira** | Dinâmico, aproveitando quando o pet corre | Tiros curtos, corda imaginária, agachar a cada arremesso |
+| 🛁 **Higiene** | Sem saltos nem equilíbrio (piso molhado) | Agachamento enquanto a água esquenta, panturrilha segurando na borda, gato-camelo com o piso seco |
+| ✨ **Outro** | Exercícios simples, sem equipamento | Agachamento, prancha, flexão |
+
+### Palavras no título que ativam subcontextos
+
+| Categoria | Subcontexto | Palavras no título (sem diferenciar acentos) |
+|---|---|---|
+| Alimentação | `agua` | água, hidratação, bebedouro |
+| Alimentação | `petisco` | petisco, biscoito, snack, recompensa, osso |
+| Passeio | `parque` | parque, praça, trilha, campo, corrida |
+| Passeio | `rapido` | rápido, curto, xixi, necessidades |
+| Medicação | `topico` | colírio, pomada, gotas, ouvido, curativo, ferida, olho |
+| Escovação | `dentes` | dente, dental, oral, boca |
+| Brincadeira | `bola` | bola, buscar, frisbee, disco |
+| Brincadeira | `laser` | laser, varinha, pena, gato, caça |
+| Higiene | `unhas` | unha, corte |
+| Higiene | `limpeza` | areia, caixa, cocô, limpeza, tapete |
+
+> 💡 Quanto mais específico o título do hábito, mais o exercício combina com a tarefa. "Passeio no parque" rende um exercício melhor que "Passeio".
+
+---
+
 ## 🎬 Como trocar um vídeo
 
 No `script.js`, procure `ExerciseVideos`. Cada tipo de exercício tem um `id`, que é o trecho depois de `watch?v=` na URL do YouTube:
@@ -187,8 +242,13 @@ Trocou o `id` ali, trocou o vídeo em **todos** os exercícios que usam esse tip
 Para **adicionar um exercício**, inclua um item na categoria desejada em `ExerciseDB`:
 
 ```js
-alimentacao: [
-  { text: "Faça 10 agachamentos enquanto prepara a ração", video: 'agachamento' },
+passeio: [
+  { text: "Ao recolher o cocô, desça em agachamento com as costas retas",
+    video: 'agachamento',   // chave de ExerciseVideos
+    fase: 'durante',        // 'antes' | 'durante' | 'depois' | 'qualquer'
+    dica: "Agache de verdade, sem curvar as costas para pegar.",  // opcional
+    noite: false,           // opcional: não sugerir à noite
+    sub: 'parque' },        // opcional: só aparece se o título ativar o subcontexto (ex.: "Passeio no parque")
   // ...
 ]
 ```
@@ -244,12 +304,13 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 
 ---
 
-## ⚡ Funcionalidades Completas (v6.0)
+## ⚡ Funcionalidades Completas (v7.0)
 
 | Categoria | Feature | Status |
 |---|---|---|
-| **Exercícios** | 42 exercícios filtrados por categoria do hábito | ✅ |
-| **Exercícios** | Botão discreto "Ver vídeo" (YouTube) abaixo do exercício | ✅ |
+| **Exercícios** | 77 exercícios filtrados por categoria, título e horário do hábito | ✅ |
+| **Exercícios** | Etiqueta de momento (antes, durante ou depois da tarefa) e dica de segurança própria | ✅ |
+| **Exercícios** | Botão discreto "Ver vídeo" (YouTube) abaixo do exercício, com 27 vídeos | ✅ |
 | **Visual** | Paleta de marca (5 cores) com contraste AA | ✅ |
 | **Visual** | Dark Mode adaptativo (Automático/Claro/Escuro) | ✅ |
 | **Visual** | Logo em quadrado branco no header | ✅ |

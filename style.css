@@ -1,5 +1,5 @@
 /* ============================================================
-   PETFIT SYNC v6.0 — style.css
+   PETFIT SYNC v7.0 — style.css
    Mobile-First | Thumb-Friendly | Skeletons | Gestures
    v4.0 → Paleta de marca · Dark Mode Adaptativo ·
           Microinterações Progressivas · Tipografia Escalonável
@@ -913,6 +913,12 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: var(--ls-tight); line-height: v
   display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
 .exercise-card-icon { font-size: 2rem; line-height: 1; }
+/* v7.0 — etiqueta de contexto: quando fazer o exercício em relação à tarefa */
+.exercise-card-when {
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: var(--ls-wide); text-transform: uppercase;
+  color: var(--primary-text); background: var(--primary-soft);
+  padding: 4px 12px; border-radius: var(--radius-full);
+}
 .exercise-card-text { font-size: var(--fs-lg); font-weight: 700; color: var(--primary-text); line-height: var(--lh-snug); letter-spacing: var(--ls-tight); text-wrap: balance; }
 /* v6.0 — ajuda discreta com vídeo-tutorial, logo abaixo do exercício */
 .exercise-help { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 10px; }
