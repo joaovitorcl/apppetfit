@@ -2,11 +2,24 @@
 
 PWA de Gestão de Hábitos para **Pets e Tutores**.
 
-> **Versão atual:** 7.0 | **Exercícios ligados ao contexto de cada tarefa, com vídeo-tutorial no YouTube**
+> **Versão atual:** 8.0 | **Sem sincronização manual, modo debug 🔧 e créditos do app**
 
 ---
 
 ## 📜 Histórico de Versões
+
+### 🏁 v8.0 — Versão final: modo debug e créditos
+> *App mais enxuto, com uma demonstração pronta e a tela de créditos*
+
+- ✅ **Sincronização manual removida**: saíram o botão **Sincronizar** da barra inferior e o gesto de **puxar para baixo para atualizar** (indicador, textos e estilos incluídos). Os dados continuam salvos automaticamente a cada ação.
+- ✅ **Botão "Novo Hábito" centralizado**: agora é o único botão da barra inferior, no centro da tela.
+- ✅ **Modo debug 🔧**: um ícone de chave inglesa pequeno nos **Ajustes**, ao lado de "PetFit v8.0". Ao tocar, carrega um **perfil de demonstração** e abre a "Evolução da Dupla" com o histórico de 7 dias: **altos e baixos na segunda e na terça**, **crescimento a partir da quarta** até o sábado, e **queda no domingo**. Tocar no 🔧 de novo (ou recarregar a página) volta aos seus dados.
+- ✅ **Debug seguro**: no modo debug nada é gravado, então seus dados reais não são sobrescritos mesmo que você marque hábitos durante a demonstração.
+- ✅ **Debug desativável pelo VSCode**: veja **"Como desativar o modo debug"** abaixo.
+- ✅ **Créditos do app**: nova opção nos **Ajustes**, logo abaixo de "Restaurar dados da dupla". Abre um modal com mensagem de agradecimento, o logo do PetFit e **3 criadores** em fotos circulares, com o nome embaixo. As fotos e os nomes são editados direto no `index.html` (veja **"Como editar os criadores"**).
+- ✅ **Histórico: barra de "hoje" corrigida**: a barra do dia atual agora mostra o progresso do dia ao vivo. Antes ela ficava vazia até o dia virar.
+
+---
 
 ### 🧭 v7.0 — Exercícios que combinam com a tarefa
 > *O exercício sugerido nunca atrapalha o que você está fazendo com o pet*
@@ -86,10 +99,8 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 ### 👆 v3.0 — Gestures
 > *Navegação por gestos nativos de mobile*
 
-#### ⬇️ Pull-to-Refresh
-- **Puxe para baixo** na lista de hábitos para sincronizar dados
-- Indicador visual com ícone rotativo e texto de status
-- Animação suave de retorno após sincronização
+#### ⬇️ Pull-to-Refresh *(removido na v8.0)*
+- Puxar a lista para baixo para sincronizar dados. Foi retirado na v8.0, junto com o botão Sincronizar.
 
 #### 👈👉 Swipe nos Cards de Hábito
 - **Deslize para a ESQUERDA** → Completa o hábito (abre modal de exercício)
@@ -143,7 +154,7 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 - **Check animado**: o ✓ é "desenhado" ao concluir, com pop e anel de onda no botão
 - **Confete e patinhas 🐾** ao concluir um hábito; **celebração extra ao bater 100%** do dia
 - **Reordenação animada (FLIP)**: o card concluído desliza até a nova posição
-- **Entrada em cascata** dos cards ao abrir, sincronizar ou trocar de filtro
+- **Entrada em cascata** dos cards ao abrir ou trocar de filtro
 - **Contadores** animados (progresso, perfil e evolução) e **barras do histórico** que crescem
 - **Swipe com feedback progressivo**: só a ação da direção do dedo aparece, o ícone cresce até o limite, "arma" com vibração e volta com mola
 - **Excluir** com animação de saída; **campo vazio** balança (shake) com vibração
@@ -175,16 +186,63 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 
 ```
 petfit-sync/
-├── index.html       ← Header com logo + botão de tema, modal de Ajustes, modal de exercício com botão de vídeo
+├── index.html       ← Header com logo + botão de tema, Ajustes (🔧 debug e Créditos), modal de exercício com botão de vídeo, modal de Créditos
 ├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações
-├── script.js        ← DataLayer + ExerciseVideos/ExerciseDB + Skeletons + Gestures + Motion + ThemeManager + App
+├── script.js        ← DataLayer + ExerciseVideos/ExerciseDB + Skeletons + Gestures + Motion + ThemeManager + App + DebugMode
 ├── manifest.json    ← PWA manifest (cores da marca)
 └── assets/
+    ├── criadores/           ← fotos dos criadores (veja o LEIA-ME.txt desta pasta)
     └── icons/
-        ├── logo.png         ← SEU LOGO do header (substitua este arquivo)
+        ├── logo.png         ← SEU LOGO do header e dos créditos (substitua este arquivo)
         ├── Petfitlogo.png   ← Favicon
+        ├── iconavatar1.png  ← Avatar padrão (placeholder dos criadores)
         └── icon-*.svg       ← Placeholders (substitua por PNGs reais)
 ```
+
+---
+
+## 🔧 Como desativar o modo debug
+
+No `script.js`, procure a **SEÇÃO 8: MODO DEBUG** (perto do final do arquivo). Escolha **uma** das opções:
+
+```js
+// Opção 1 (mais simples): comente a linha da flag com //
+// const PETFIT_DEBUG = true;
+
+// Opção 2: troque true por false
+const PETFIT_DEBUG = false;
+
+// Opção 3: selecione o bloco inteiro da SEÇÃO 8 e use Ctrl + /
+```
+
+Nas três opções o ícone 🔧 some dos Ajustes e **o resto do app continua funcionando normalmente**, sem erro no console. Para reativar, desfaça o comentário.
+
+### Curva da semana na demonstração
+
+| Seg | Ter | Qua | Qui | Sex | Sáb | Dom |
+|---|---|---|---|---|---|---|
+| 65% | 40% | 55% | 70% | 85% | 100% | cai (hábitos do dia) |
+
+Os valores ficam em `DebugMode.curve` (por dia da semana, de 0 = domingo a 6 = sábado) e podem ser ajustados. A quantidade de exercícios da demonstração está em `DebugMode.exercisesDone`.
+
+---
+
+## ✨ Como editar os criadores
+
+Abra o `index.html` e procure por **EDITE AQUI: FOTOS E NOMES DOS CRIADORES**. Para cada um dos 3 criadores:
+
+```html
+<figure class="creator">
+  <img class="creator-photo" src="assets/criadores/ana.jpg" ...>   <!-- troque o caminho da foto -->
+  <figcaption class="creator-name">Ana Beatriz Cardoso</figcaption>   <!-- troque pelo nome completo -->
+</figure>
+```
+
+1. Coloque as fotos (quadradas ficam melhores) na pasta `assets/criadores/`.
+2. Troque o `src` da foto e o texto do nome.
+3. Se o caminho da foto estiver errado, o app mostra o avatar padrão (`iconavatar1.png`) e nada quebra.
+
+A mensagem de agradecimento fica logo acima, no bloco `credits-hero` do mesmo modal (`modalCredits`).
 
 ---
 
@@ -304,7 +362,7 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 
 ---
 
-## ⚡ Funcionalidades Completas (v7.0)
+## ⚡ Funcionalidades Completas (v8.0)
 
 | Categoria | Feature | Status |
 |---|---|---|
@@ -319,13 +377,14 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 | **Microinterações** | Check animado, confete, celebração 100% | ✅ |
 | **Microinterações** | Reordenação animada, cascata, contadores | ✅ |
 | **Microinterações** | Ripple, shake, swipe com feedback progressivo | ✅ |
-| **Gestures** | Pull-to-Refresh | ✅ |
 | **Gestures** | Swipe Left/Right nos cards | ✅ |
 | **Gestures** | Long-Press menu de contexto | ✅ |
 | **Gestures** | Swipe-to-Dismiss nos modais | ✅ |
 | **Gestures** | Gesture Hint educativo | ✅ |
 | **UI** | Skeleton Screens com shimmer | ✅ |
-| **UI** | Thumb-Friendly Zone | ✅ |
+| **UI** | Thumb-Friendly Zone, botão "Novo Hábito" centralizado | ✅ |
+| **UI** | Créditos do app com logo e 3 criadores editáveis | ✅ |
+| **Debug** | Modo debug 🔧 com perfil de demonstração (desativável por comentário) | ✅ |
 | **Dados** | DataLayer (localStorage/Firebase) | ✅ |
 | **Dados** | Reset diário automático | ✅ |
 | **Dados** | Histórico 7 dias com gráfico | ✅ |

@@ -1,0 +1,15 @@
+FOTOS DOS CRIADORES (tela Ajustes > Creditos do app)
+
+1) Coloque aqui as 3 fotos (quadradas ficam melhores), por exemplo:
+     assets/criadores/ana.jpg
+     assets/criadores/bruno.jpg
+     assets/criadores/carla.jpg
+
+2) Abra o index.html e procure por:   EDITE AQUI: FOTOS E NOMES DOS CRIADORES
+
+3) Em cada criador, troque:
+     src="assets/icons/iconavatar1.png"     ->  src="assets/criadores/ana.jpg"
+     <figcaption ...>Seu Nome aqui<...>     ->  o nome completo
+
+Se o caminho da foto estiver errado, o app mostra o avatar padrao
+(assets/icons/iconavatar1.png) e nada quebra.

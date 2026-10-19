@@ -91,14 +91,6 @@
     </div>
   </header>
 
-  <!-- Indicador de Pull-to-Refresh -->
-  <div class="ptr-indicator" id="ptrIndicator">
-    <div class="ptr-spinner">
-      <span class="ptr-icon">🔄</span>
-      <span class="ptr-text">Puxe para sincronizar</span>
-    </div>
-  </div>
-
   <!-- ==================== DASHBOARD (TOP ZONE) ==================== -->
   <section class="dashboard-panel" id="dashboardPanel">
     <div class="dashboard-inner">
@@ -223,10 +215,6 @@
 
   <!-- ==================== ÁREA INFERIOR (THUMB ZONE) ==================== -->
   <div class="quick-actions" id="quickActions">
-    <button class="quick-btn" id="btnSyncNow" aria-label="Sincronizar agora">
-      <span class="quick-icon">⚡</span>
-      <span class="quick-label">Sincronizar</span>
-    </button>
     <button class="quick-btn" id="btnAddHabit" aria-label="Novo hábito">
       <span class="quick-icon">+</span>
       <span class="quick-label">Novo Hábito</span>
@@ -656,12 +644,84 @@
             </button>
           </div>
 
+          <div class="settings-credits">
+            <button id="openCreditsBtn" type="button" class="settings-row-btn">
+              <span class="settings-row-icon" aria-hidden="true">✨</span>
+              <span class="settings-row-text">
+                <strong>Créditos do app</strong>
+                <small>Quem criou o PetFit</small>
+              </span>
+              <span class="settings-row-chevron" aria-hidden="true">›</span>
+            </button>
+          </div>
+
           </div>
         </section>
-        <p class="settings-version">PetFit v7.0</p>
+        <p class="settings-version">
+          <span>PetFit v8.0</span>
+          <!-- 🔧 MODO DEBUG: o botão nasce escondido (hidden). Só aparece se PETFIT_DEBUG estiver ativo no script.js -->
+          <button type="button" class="debug-btn" id="debugBtn" hidden aria-pressed="false"
+                  aria-label="Modo debug: carregar perfil de demonstração" title="Debug">🔧</button>
+        </p>
       </div>
       <div class="modal-footer">
         <button class="btn-primary btn-full" id="closeSettingsBtn">Pronto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Modal: Créditos do app (v8.0) ==================== -->
+  <div class="modal-overlay" id="modalCredits">
+    <div class="modal-sheet modal-credits">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Créditos</h2>
+        <button class="btn-icon modal-close" id="closeCredits" aria-label="Fechar">
+          <span>✕</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="credits-hero">
+          <span class="credits-logo">
+            <img src="assets/icons/logo.png" alt="Logo PetFit" width="96" height="96" decoding="async">
+          </span>
+          <h3 class="credits-thanks">Obrigado por usar o PetFit! 🐾</h3>
+          <p class="credits-text">Cada passeio, cada brincadeira e cada exercício contam. Que bom ter você e seu pet nessa jornada de movimento e cuidado!</p>
+        </div>
+
+        <h4 class="credits-label">Criadores</h4>
+
+        <!-- ╔════════════════════════════════════════════════════════════════════════════╗
+             ║  ✏️  EDITE AQUI: FOTOS E NOMES DOS CRIADORES                               ║
+             ║  1) Coloque a foto em  assets/criadores/  (ex.: assets/criadores/ana.jpg)  ║
+             ║  2) Troque o src="..." da <img> pelo caminho da foto                       ║
+             ║  3) Troque o texto "Seu Nome aqui" pelo nome completo                      ║
+             ║  Dica: use fotos quadradas. O app corta em círculo sozinho.                ║
+             ║  Se o caminho estiver errado, o app mostra o avatar padrão.                ║
+             ╚════════════════════════════════════════════════════════════════════════════╝ -->
+        <div class="creators">
+          <!-- Criador 1 -->
+          <figure class="creator">
+            <img class="creator-photo" src="assets/icons/iconavatar1.png" alt="Foto do criador 1" width="88" height="88" loading="lazy"
+                 onerror="this.onerror=null;this.src='assets/icons/iconavatar1.png'">
+            <figcaption class="creator-name">Seu Nome aqui</figcaption>
+          </figure>
+          <!-- Criador 2 -->
+          <figure class="creator">
+            <img class="creator-photo" src="assets/icons/iconavatar1.png" alt="Foto do criador 2" width="88" height="88" loading="lazy"
+                 onerror="this.onerror=null;this.src='assets/icons/iconavatar1.png'">
+            <figcaption class="creator-name">Seu Nome aqui</figcaption>
+          </figure>
+          <!-- Criador 3 -->
+          <figure class="creator">
+            <img class="creator-photo" src="assets/icons/iconavatar1.png" alt="Foto do criador 3" width="88" height="88" loading="lazy"
+                 onerror="this.onerror=null;this.src='assets/icons/iconavatar1.png'">
+            <figcaption class="creator-name">Seu Nome aqui</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary btn-full" id="closeCreditsBtn">Voltar</button>
       </div>
     </div>
   </div>

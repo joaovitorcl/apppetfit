@@ -1,5 +1,5 @@
 /* ============================================================
-   PETFIT SYNC v7.0 — style.css
+   PETFIT SYNC v8.0 — style.css
    Mobile-First | Thumb-Friendly | Skeletons | Gestures
    v4.0 → Paleta de marca · Dark Mode Adaptativo ·
           Microinterações Progressivas · Tipografia Escalonável
@@ -9,7 +9,7 @@
    2. Tokens: paleta, tema claro, tema escuro, tipografia
    3. Base
    4. Skeletons
-   5. Pull-to-refresh e Gesture hint
+   5. Gesture hint
    6. Cards de hábito + swipe
    7. Menu de long-press
    8. Header (logo, tema)
@@ -210,30 +210,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: var(--ls-tight); line-height: v
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== 5. PULL-TO-REFRESH + GESTURE HINT ===== */
-.ptr-indicator {
-  position: fixed;
-  top: calc(var(--header-height) + var(--safe-top));
-  left: 0; right: 0; z-index: 90;
-  display: flex; justify-content: center; align-items: center;
-  padding: 12px;
-  transform: translateY(-100%);
-  transition: transform 0.2s ease;
-  pointer-events: none;
-}
-.ptr-indicator.visible, .ptr-indicator.refreshing { transform: translateY(0); }
-.ptr-spinner {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--bg-card); padding: 8px 16px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  font-size: var(--fs-sm); color: var(--text-secondary); font-weight: 500;
-}
-.ptr-icon { font-size: 1.125rem; display: inline-block; }
-.ptr-indicator.refreshing .ptr-icon { animation: spin 0.8s linear infinite; }
-.ptr-text { font-size: var(--fs-xs); font-weight: 600; }
-
+/* ===== 5. GESTURE HINT ===== */
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .gesture-hint {
@@ -567,20 +544,19 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: var(--ls-tight); line-height: v
   left: 50%; transform: translateX(-50%); width: 100%;
 }
 .quick-btn {
-  flex: 1; max-width: 200px; min-height: var(--quick-actions-height);
+  flex: 0 1 240px; width: 100%; min-height: var(--quick-actions-height);
+  margin: 0 auto;                                  /* v8.0: botão único, centralizado */
   padding: 0 10px; text-align: center; line-height: var(--lh-tight);
-  border-radius: var(--radius-md); border: none;
-  background: linear-gradient(135deg, var(--primary-grad) 0%, var(--primary) 100%); color: var(--on-primary);
+  border-radius: var(--radius-md); border: 2px solid var(--primary);
+  background: var(--bg-card); color: var(--primary-text);
   font-family: inherit; font-size: var(--fs-md); font-weight: 700;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-  box-shadow: var(--shadow-fab); transition: transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.2s ease;
   position: relative; overflow: hidden;
 }
 .quick-btn:active { transform: scale(0.96); }
-.quick-btn:nth-child(2) { background: var(--bg-card); color: var(--primary-text); border: 2px solid var(--primary); box-shadow: var(--shadow-sm); }
 .quick-icon { font-size: 1.25rem; line-height: 1; display: inline-block; }
 .quick-btn:active .quick-icon { transform: rotate(25deg) scale(1.2); transition: transform 0.15s ease; }
-.quick-btn.is-syncing .quick-icon { animation: spin 0.8s linear infinite; }
 
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 600;
@@ -897,7 +873,61 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: var(--ls-tight); line-height: v
 .type-preview-title { font-size: var(--fs-lg); font-weight: 700; letter-spacing: var(--ls-tight); line-height: var(--lh-snug); }
 .type-preview-text { font-size: var(--fs-md); color: var(--text-secondary); margin-top: 2px; }
 .type-preview-caption { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 6px; font-weight: 500; }
-.settings-version { text-align: center; font-size: var(--fs-xs); color: var(--text-muted); font-weight: 600; letter-spacing: var(--ls-wide); text-transform: uppercase; padding: 4px 0 8px; }
+.settings-version { display: flex; align-items: center; justify-content: center; gap: 2px; text-align: center; font-size: var(--fs-xs); color: var(--text-muted); font-weight: 600; letter-spacing: var(--ls-wide); text-transform: uppercase; padding: 4px 0 8px; }
+/* v8.0 — 🔧 modo debug: ícone pequeno e discreto ao lado de "PetFit v8.0" */
+.debug-btn {
+  position: relative; display: inline-grid; place-items: center;
+  width: 24px; height: 24px; margin: 0; padding: 0;
+  font-size: 0.8125rem; line-height: 1; text-transform: none;
+  background: transparent; border: none; border-radius: var(--radius-full);
+  color: inherit; opacity: 0.55; cursor: pointer;
+  transition: opacity 0.2s, background 0.2s, transform 0.2s var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.debug-btn::after { content: ""; position: absolute; inset: -12px; }      /* área de toque ≥ 48px */
+.debug-btn[hidden] { display: none; }
+.debug-btn:hover, .debug-btn:focus-visible { opacity: 1; }
+.debug-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.debug-btn:active { transform: rotate(-25deg) scale(0.9); }
+.debug-btn.is-on { opacity: 1; background: var(--primary-soft); box-shadow: 0 0 0 1.5px var(--primary); }
+
+/* v8.0 — opção "Créditos do app" nos Ajustes */
+.settings-credits { margin-top: 16px; }
+.settings-row-btn {
+  width: 100%; min-height: var(--touch-min); padding: 10px 14px;
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  font-family: inherit; color: var(--text-primary);
+  background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  cursor: pointer; transition: transform 0.15s var(--ease-out), background 0.2s;
+}
+.settings-row-btn:hover { background: var(--primary-soft); }
+.settings-row-btn:active { transform: scale(0.98); }
+.settings-row-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.settings-row-icon { font-size: 1.25rem; line-height: 1; }
+.settings-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.settings-row-text strong { font-size: var(--fs-md); font-weight: 700; }
+.settings-row-text small { font-size: var(--fs-xs); color: var(--text-muted); }
+.settings-row-chevron { font-size: 1.5rem; line-height: 1; color: var(--text-muted); }
+
+/* v8.0 — modal de créditos */
+.credits-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; margin-bottom: 22px; }
+.credits-logo {
+  width: 112px; height: 112px; display: grid; place-items: center; overflow: hidden;
+  background: #FFFFFF; border-radius: var(--radius-xl); box-shadow: var(--shadow-md);
+}
+.credits-logo img { width: 100%; height: 100%; object-fit: cover; transform: translateY(-5%) scale(1.15); display: block; }   /* reduz a margem branca do PNG sem cortar o desenho */
+.credits-thanks { font-size: var(--fs-xl); font-weight: 800; color: var(--text-primary); line-height: var(--lh-snug); letter-spacing: var(--ls-tight); text-wrap: balance; }
+.credits-text { font-size: var(--fs-sm); color: var(--text-secondary); line-height: var(--lh-body); max-width: 34ch; text-wrap: pretty; }
+.credits-label { text-align: center; font-size: var(--fs-xs); font-weight: 700; letter-spacing: var(--ls-wide); text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; }
+.creators { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding-bottom: 8px; }
+.creator { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0; min-width: 0; }
+.creator-photo {
+  width: 100%; max-width: 88px; aspect-ratio: 1; height: auto; object-fit: cover; display: block;
+  border-radius: var(--radius-full); border: 3px solid var(--primary); background: var(--bg-input);
+  box-shadow: var(--shadow-sm);
+}
+.creator-name { font-size: var(--fs-sm); font-weight: 600; color: var(--text-primary); text-align: center; line-height: var(--lh-snug); overflow-wrap: anywhere; text-wrap: balance; }
+
 
 /* ===== 13. EXERCÍCIO, PERFIL, ESTATÍSTICAS ===== */
 .modal-exercise { text-align: center; }
@@ -1046,7 +1076,7 @@ html.theme-fade, html.theme-fade *, html.theme-fade *::before, html.theme-fade *
   .quick-btn { padding: 0 6px; gap: 4px; }
 }
 @media (max-width: 380px) {
-  .quick-btn { font-size: var(--fs-sm); }   /* cabe "Sincronizar" mesmo com o texto em "Maior" */
+  .quick-btn { font-size: var(--fs-sm); }   /* cabe "Novo Hábito" mesmo com o texto em "Maior" */
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }

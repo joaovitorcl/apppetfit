@@ -1,11 +1,12 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- *  PETFIT SYNC v7.0 — script.js
+ *  PETFIT SYNC v8.0 — script.js
  *  PWA de Gestão de Hábitos para Pets e Tutores
- *  Features: Skeletons | DataLayer | Gestures (Pull, Swipe, Long-Press)
+ *  Features: Skeletons | DataLayer | Gestures (Swipe, Long-Press)
  *            + Dark Mode Adaptativo | Microinterações | Tipografia Escalonável
  *            + Exercícios por categoria com vídeo-tutorial no YouTube (v6.0)
  *            + Exercícios ligados ao contexto da tarefa: fase, título, horário e segurança (v7.0)
+ *            + Sem sincronização manual | Modo debug 🔧 | Créditos do app (v8.0)
  *  ═══════════════════════════════════════════════════════════════
  */
 
@@ -83,13 +84,15 @@ const DataLayer = {
   },
 
   driver() { return CONFIG.useFirebase ? this._firebase : this._local; },
+  // v8.0: com frozen=true nada é gravado (o modo debug usa isso para NÃO sobrescrever seus dados reais)
+  frozen: false,
   async getAll() { return this.driver().getAll(); },
-  async saveHabits(h) { return this.driver().saveHabits(h); },
-  async saveProfile(p) { return this.driver().saveProfile(p); },
-  async saveHistory(h) { return this.driver().saveHistory(h); },
-  async saveExercises(c) { return this.driver().saveExercises(c); },
-  async saveLastDate(d) { return this.driver().saveLastDate(d); },
-  async saveGestureHint(s) { return this.driver().saveGestureHint(s); }
+  async saveHabits(h) { if(this.frozen) return true; return this.driver().saveHabits(h); },
+  async saveProfile(p) { if(this.frozen) return true; return this.driver().saveProfile(p); },
+  async saveHistory(h) { if(this.frozen) return true; return this.driver().saveHistory(h); },
+  async saveExercises(c) { if(this.frozen) return true; return this.driver().saveExercises(c); },
+  async saveLastDate(d) { if(this.frozen) return true; return this.driver().saveLastDate(d); },
+  async saveGestureHint(s) { if(this.frozen) return true; return this.driver().saveGestureHint(s); }
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -604,51 +607,6 @@ const BrandLogo = {
 //  SEÇÃO 5: GESTURE ENGINE ⭐
 // ═══════════════════════════════════════════════════════════════
 const GestureEngine = {
-  ptr: {
-    startY:0, currentY:0, isPulling:false, threshold:80,
-    indicator:null, mainContent:null,
-    init() {
-      this.indicator = document.getElementById('ptrIndicator');
-      this.mainContent = document.getElementById('mainContent');
-      if(!this.mainContent) return;
-      this.mainContent.addEventListener('touchstart', e=>this.onTouchStart(e), {passive:true});
-      this.mainContent.addEventListener('touchmove', e=>this.onTouchMove(e), {passive:true});
-      this.mainContent.addEventListener('touchend', e=>this.onTouchEnd(e), {passive:true});
-    },
-    onTouchStart(e) {
-      if(this.mainContent.scrollTop > 0) return;
-      this.startY = e.touches[0].clientY;
-      this.isPulling = true;
-    },
-    onTouchMove(e) {
-      if(!this.isPulling) return;
-      this.currentY = e.touches[0].clientY;
-      const diff = this.currentY - this.startY;
-      if(diff > 0 && this.mainContent.scrollTop <= 0) {
-        const progress = Math.min(diff/this.threshold, 1);
-        this.indicator.style.transform = `translateY(${diff*0.5}px)`;
-        this.indicator.classList.add('visible');
-        this.indicator.querySelector('.ptr-icon').style.transform = `rotate(${progress*360}deg)`;
-      }
-    },
-    onTouchEnd(e) {
-      if(!this.isPulling) return;
-      this.isPulling = false;
-      const diff = this.currentY - this.startY;
-      this.indicator.style.transform = '';
-      if(diff > this.threshold && this.mainContent.scrollTop <= 0) {
-        this.indicator.classList.add('refreshing');
-        this.indicator.querySelector('.ptr-text').textContent = 'Sincronizando...';
-        App.refreshData().then(() => {
-          this.indicator.classList.remove('refreshing','visible');
-          this.indicator.querySelector('.ptr-text').textContent = 'Puxe para sincronizar';
-        });
-      } else {
-        this.indicator.classList.remove('visible');
-      }
-    }
-  },
-
   swipe: {
     startX:0, currentX:0, isSwiping:false, currentCard:null, threshold:80, armed:false,
     init() {
@@ -779,6 +737,10 @@ const GestureEngine = {
 // ═══════════════════════════════════════════════════════════════
 //  SEÇÃO 6: APLICAÇÃO PRINCIPAL
 // ═══════════════════════════════════════════════════════════════
+/** v8.0 — true só se o modo debug estiver ligado E existir no arquivo. Seguro mesmo com o bloco comentado. */
+const debugDisponivel = () =>
+  typeof PETFIT_DEBUG !== 'undefined' && PETFIT_DEBUG === true && typeof DebugMode !== 'undefined';
+
 const App = {
   habits:[], profile:{petName:'Rex', tutorName:'Tutor', avatar:'./assets/icons/iconpet1.png'},
   history:[], exercisesDone:0, currentFilter:'all', pendingHabitId:null, pendingHabitAction:null, currentExercise:null, isLoading:false, gestureHintShown:false,
@@ -788,11 +750,11 @@ const App = {
     ThemeManager.init();
     TextScale.init();
     SettingsUI.init();
+    if (debugDisponivel()) DebugMode.init();   // v8.0: 🔧 (opcional — veja a SEÇÃO 8)
     BrandLogo.init();
     Motion.initRipple();
     SkeletonManager.show();
     this.setupEventListeners();
-    GestureEngine.ptr.init();
     GestureEngine.swipe.init();
     GestureEngine.longPress.init();
     this.setupServiceWorker();
@@ -803,16 +765,6 @@ const App = {
     this.animateList = true;
     this.renderAll();
     this.showGestureHint();
-  },
-
-  async refreshData() {
-    SkeletonManager.show();
-    await this.loadData();
-    await this.checkDayReset();
-    SkeletonManager.hide();
-    this.animateList = true;
-    this.renderAll();
-    this.showToast('⚡ Dados sincronizados!', 'success');
   },
 
   async loadData() {
@@ -1231,7 +1183,9 @@ async finishProfileSetup() {
       const dayIdx = (todayIdx-i+7)%7;
       const dateStr = this.getDateString(i);
       const record = history.find(h=>h.date===dateStr);
-      displayData.push({label:days[dayIdx], percentage:record?record.percentage:0, isToday:i===0});
+      const total = this.habits.length;
+      const livePct = total>0 ? Math.round((this.habits.filter(h=>h.completed).length/total)*100) : 0;
+      displayData.push({label:days[dayIdx], percentage: i===0 ? livePct : (record?record.percentage:0), isToday:i===0});
     }
     const maxVal = Math.max(...displayData.map(d=>d.percentage), 100);
     container.innerHTML = displayData.map((d,i)=>`<div class="history-bar-wrap"><div class="history-bar ${d.isToday?'today':''}" style="height:${Math.max((d.percentage/maxVal)*100,4)}%;--i:${i};" title="${d.percentage}%"></div><span class="history-bar-label">${d.label}</span></div>`).join('');
@@ -1317,10 +1271,6 @@ if (tutorPhotoInput && customTutorAvatar) {
     document.getElementById('btnProfile').addEventListener('click', ()=>this.openProfile());
     document.getElementById('savePetBtn')
   .addEventListener('click', () => this.savePetStep());
-    document.getElementById('btnSyncNow').addEventListener('click', async (e)=>{
-      const btn = e.currentTarget; btn.classList.add('is-syncing'); Motion.haptic(20);
-      try { await this.refreshData(); } finally { btn.classList.remove('is-syncing'); }
-    });
     document.getElementById('btnTheme').addEventListener('click', (e)=>{
       const r = e.currentTarget.getBoundingClientRect();
       ThemeManager.toggle({ x: r.left + r.width/2, y: r.top + r.height/2 });
@@ -1328,6 +1278,10 @@ if (tutorPhotoInput && customTutorAvatar) {
     });
     document.getElementById('closeSettings').addEventListener('click', ()=>this.closeModal('modalSettings'));
     document.getElementById('closeSettingsBtn').addEventListener('click', ()=>this.closeModal('modalSettings'));
+    // v8.0 — Créditos do app (Ajustes → Créditos)
+    document.getElementById('openCreditsBtn')?.addEventListener('click', ()=>{ this.closeModal('modalSettings'); this.openModal('modalCredits'); });
+    document.getElementById('closeCredits')?.addEventListener('click', ()=>this.closeModal('modalCredits'));
+    document.getElementById('closeCreditsBtn')?.addEventListener('click', ()=>{ this.closeModal('modalCredits'); this.openSettings(); });
     document.getElementById('btnAddHabit').addEventListener('click', ()=>{ this.openModal('modalAddHabit'); if(navigator.vibrate) navigator.vibrate(15); });
     document.getElementById('closeAddHabit').addEventListener('click', ()=>this.closeModal('modalAddHabit'));
     document.getElementById('closeProfile').addEventListener('click', ()=>this.closeModal('modalProfile'));
@@ -1460,6 +1414,96 @@ if (petPhotoInput) {
     window.addEventListener('online', ()=>{ banner.classList.remove('active'); this.showToast('🌐 Conexão restaurada!', 'success'); });
     window.addEventListener('offline', ()=>banner.classList.add('active'));
     update();
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  SEÇÃO 8: MODO DEBUG 🔧 (v8.0) — OPCIONAL
+// ═══════════════════════════════════════════════════════════════
+//  O que faz: o ícone 🔧 (Ajustes, ao lado de "PetFit v8.0") carrega um
+//  perfil de DEMONSTRAÇÃO com a evolução da dupla nos últimos 7 dias:
+//  altos e baixos na segunda e na terça, crescimento a partir da quarta
+//  e queda no domingo. Nada é gravado: seus dados reais ficam intactos.
+//  Tocar no 🔧 de novo (ou recarregar a página) volta aos seus dados.
+//
+//  ┌─ COMO DESATIVAR NO VSCODE (o app continua funcionando normalmente) ─┐
+//  │  Opção 1 (mais simples): coloque // no começo da linha abaixo:      │
+//  │            const PETFIT_DEBUG = true;                               │
+//  │  Opção 2: troque  true  por  false                                  │
+//  │  Opção 3: selecione TODO este bloco e use Ctrl + /  (comenta tudo)  │
+//  │  Em qualquer caso o ícone 🔧 some dos Ajustes e mais nada muda.     │
+//  └─────────────────────────────────────────────────────────────────────┘
+// ═══════════════════════════════════════════════════════════════
+const PETFIT_DEBUG = true;
+
+const DebugMode = {
+  active: false,
+  _snapshot: null,
+
+  // % de hábitos concluídos em cada dia da semana (0 = Dom … 6 = Sáb)
+  // Seg/Ter: sobe e desce · Qua→Sáb: crescendo · Dom: cai de novo
+  curve: { 1: 65, 2: 40, 3: 55, 4: 70, 5: 85, 6: 100, 0: 40 },
+  exercisesDone: 23,
+
+  init() {
+    const btn = document.getElementById('debugBtn');
+    if (!btn) return;
+    btn.hidden = false;                              // só aparece quando o debug está ligado
+    btn.addEventListener('click', () => this.toggle());
+  },
+
+  toggle() { this.active ? this.exit() : this.enter(); },
+
+  enter() {
+    // guarda o estado real e congela qualquer gravação
+    this._snapshot = { habits: App.habits, profile: App.profile, history: App.history, exercisesDone: App.exercisesDone };
+    DataLayer.frozen = true;
+    this.active = true;
+
+    const todayIdx = new Date().getDay();
+    const total = DefaultHabits.length;
+
+    // histórico: os 6 dias anteriores seguem a curva da semana (hoje usa o progresso ao vivo)
+    const history = [];
+    for (let i = 6; i >= 1; i--) {
+      const weekday = (todayIdx - i + 7) % 7;
+      const percentage = this.curve[weekday];
+      history.push({ date: App.getDateString(i), completed: Math.round(percentage * total / 100), total, percentage });
+    }
+
+    // hoje: hábitos concluídos conforme a curva do dia da semana
+    const doneToday = Math.round(this.curve[todayIdx] * total / 100);
+    App.habits = DefaultHabits.map((h, idx) => ({ ...h, completed: idx < doneToday }));
+    App.history = history;
+    App.exercisesDone = this.exercisesDone;
+    App.profile = { petName: 'Rex', tutorName: 'Tutor', avatar: './assets/icons/iconpet1.png' };
+
+    this._paint(true);
+    App.showToast('🔧 Modo debug: perfil de demonstração (nada é salvo)', 'success');
+    App.closeModal('modalSettings');
+    setTimeout(() => App.openStats(), 350);          // já mostra a "Evolução da Dupla"
+  },
+
+  exit() {
+    const snap = this._snapshot;
+    if (snap) {
+      App.habits = snap.habits; App.profile = snap.profile;
+      App.history = snap.history; App.exercisesDone = snap.exercisesDone;
+    }
+    this._snapshot = null;
+    DataLayer.frozen = false;
+    this.active = false;
+    this._paint(false);
+    App.showToast('🔧 Modo debug desativado: seus dados voltaram', 'success');
+  },
+
+  _paint(on) {
+    const btn = document.getElementById('debugBtn');
+    if (btn) { btn.classList.toggle('is-on', on); btn.setAttribute('aria-pressed', String(on)); }
+    document.body.classList.toggle('debug-on', on);
+    App._shownPercent = undefined;                   // evita a animação de "100%!" ao trocar de perfil
+    App.animateList = true;
+    App.renderAll();
   }
 };
 
