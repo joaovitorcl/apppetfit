@@ -1,4 +1,4 @@
-# 🐾 PetFit Sync
+# 🐾 PetFit
 
 PWA de Gestão de Hábitos para **Pets e Tutores**.
 
