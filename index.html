@@ -143,6 +143,16 @@
   <main class="main-content" id="mainContent">
     <div class="main-inner">
 
+      <!-- ASSISTENTE: campo de uma linha. Ao enviar, abre a conversa (modal "modalChat") -->
+      <form class="ask-bar" id="askBar" autocomplete="off" role="search">
+        <span class="ask-bar-icon" aria-hidden="true">🐾</span>
+        <input type="text" id="askInput" class="ask-bar-input" maxlength="300" enterkeyhint="send"
+               placeholder="Dúvidas do app ou do pet?" aria-label="Pergunte ao assistente PetFit">
+        <button type="submit" class="ask-bar-send" aria-label="Enviar pergunta">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.6 2-12.6 2z"/></svg>
+        </button>
+      </form>
+
       <!-- Filtro de Categoria (swipeable) -->
       <div class="filter-bar" id="filterBar">
         <button class="filter-chip active" data-filter="all">Todos</button>
@@ -726,6 +736,41 @@
     </div>
   </div>
 
+  <!-- ==================== Modal: Assistente PetFit (chatbot local) ==================== -->
+  <div class="modal-overlay" id="modalChat">
+    <div class="modal-sheet modal-chat modal-tall" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2 id="chatTitle">Assistente PetFit</h2>
+        <button class="btn-icon modal-close" id="closeChat" type="button" aria-label="Fechar">
+          <span>✕</span>
+        </button>
+      </div>
+      <div class="chat-status" id="chatStatus" role="status" hidden></div>
+      <progress class="chat-progress" id="chatProgress" max="100" value="0" hidden></progress>
+      <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-label="Conversa com o assistente"></div>
+      <form class="chat-form" id="chatForm" autocomplete="off">
+        <input type="text" id="chatInput" class="chat-input" maxlength="300" enterkeyhint="send"
+               placeholder="Escreva sua pergunta…" aria-label="Sua pergunta">
+        <button type="submit" id="chatSend" class="ask-bar-send" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.6 2-12.6 2z"/></svg>
+        </button>
+      </form>
+      <details class="chat-options">
+        <summary>Opções do assistente</summary>
+        <label class="chat-options-label" for="chatMode">Como o assistente responde</label>
+        <select id="chatMode" class="chat-select">
+          <option value="full-1.5b">Completo · resposta gerada (Qwen2.5 1,5B · ~1,2 GB · WebGPU)</option>
+          <option value="full-0.5b">Completo leve · resposta gerada (Qwen2.5 0,5B · ~0,5 GB · WebGPU)</option>
+          <option value="semantic">Busca semântica + trechos do guia (sem gerador)</option>
+          <option value="light">Modo leve · palavras-chave (nada para baixar)</option>
+        </select>
+        <p class="chat-options-hint">Tudo roda no seu aparelho. O assistente só responde com o guia do PetFit e não substitui o veterinário.</p>
+        <button type="button" class="btn-secondary btn-full" id="chatClear">Limpar conversa</button>
+      </details>
+    </div>
+  </div>
+
   <!-- Toast Notifications -->
   <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
 
@@ -735,5 +780,8 @@
   </div>
 
   <script src="script.js"></script>
+  <!-- Assistente local (RAG no navegador): base de conhecimento + lógica. Os modelos só são baixados quando a pessoa aceita. -->
+  <script src="chatbot-kb.js"></script>
+  <script src="chatbot.js"></script>
 </body>
 </html>

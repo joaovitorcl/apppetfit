@@ -8,6 +8,35 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 
 ## 📜 Histórico de Versões
 
+### 🤖 v8.1 — Assistente PetFit (chatbot local, WebGPU)
+> *Um campo de uma linha na tela Hoje que abre uma conversa com um assistente que roda no navegador*
+
+- ✅ **Campo de uma linha** no topo da lista de hábitos ("Dúvidas do app ou do pet?"). Ao enviar, abre a conversa (modal **Assistente PetFit**) já com a pergunta.
+- ✅ **RAG no navegador**: o guia (`chatbot-kb.js`) é **quebrado em trechos** (~500 caracteres), **vetorizado** com o modelo [`Xenova/multilingual-e5-small`](https://huggingface.co/Xenova/multilingual-e5-small) (multilíngue, entende português) e consultado por **busca híbrida** (vetores + palavras-chave BM25, fundidas por RRF).
+- ✅ **WebGPU**: embeddings em WebGPU (fp16) quando o aparelho suporta, com **validação dos vetores** e queda automática para WASM (q8). A resposta é gerada por [`onnx-community/Qwen2.5-1.5B-Instruct`](https://huggingface.co/onnx-community/Qwen2.5-1.5B-Instruct) ou `0.5B` (WebGPU, q4f16), com texto em *streaming*.
+- ✅ **Sem alucinação por construção** (veja "Como o assistente evita inventar" abaixo).
+- ✅ **Privacidade**: perguntas e dados da dupla não saem do aparelho. Só os modelos são baixados (Hugging Face / jsDelivr), uma vez, **depois de a pessoa aceitar**, e ficam em cache.
+- ✅ **4 modos** (em *Opções do assistente*): Completo 1,5B (~1,2 GB), Completo leve 0,5B (~0,5 GB), Busca semântica + trechos do guia (sem gerador) e Modo leve (palavras-chave, nada para baixar).
+- ✅ Sem WebGPU (ou sem `shader-f16`) o app **não quebra**: cai para busca semântica + trechos do guia.
+
+#### Como o assistente evita inventar
+1. **Emergências e doses de remédio** (convulsão, envenenamento, "posso dar dipirona?") têm **resposta fixa**, sem IA.
+2. Se a busca **não encontra nada relevante**, ele diz que não sabe, sem chamar o gerador. O limite de "relevante" é **calibrado sozinho**: no primeiro uso, o app mede a similaridade de perguntas sem relação com o guia (futebol, receitas…) e exige que as perguntas reais superem esse ruído.
+3. O gerador recebe **só os trechos encontrados** e a ordem de responder `NAO_ENCONTRADO` quando eles não bastam.
+4. A resposta é **conferida**: números, links/telefones ou vocabulário que não existam nos trechos fazem o app **descartar** o texto gerado e mostrar o trecho original do guia.
+5. Toda resposta mostra a **fonte** (título do assunto do guia). Respostas de saúde trazem o aviso de que não substituem o veterinário.
+
+#### Como editar o conteúdo do assistente
+Abra o `chatbot-kb.js`. Cada assunto é `{ id, tema, titulo, texto }`; separe os parágrafos com uma linha em branco. Ao salvar, os vetores são recalculados sozinhos. **Se algo não estiver no guia, o assistente não responde.** Para saúde, escreva só orientações gerais e nunca doses.
+
+#### Como testar e ajustar
+- Abra o app com `?chatdebug` na URL (ou `localStorage.setItem('petfit_chat_debug','1')`) para ver, em cada resposta, `cos` (similaridade), `limite` (ruído calibrado), `lex` e `cob` (palavras-chave) e `conf`.
+- Se ele recusar perguntas boas, diminua `CONFIG.denseMargin` (ex.: `-0.02`) em `chatbot.js`. Se aceitar perguntas fora do assunto, aumente (ex.: `0.02`).
+- O app precisa ser aberto por **http(s) ou localhost** (WebGPU e módulos exigem contexto seguro), não por `file://`.
+- Em um futuro Service Worker real, **não cacheie** requisições cross-origin do `huggingface.co`: o Transformers.js já guarda os modelos no Cache do navegador.
+
+---
+
 ### 🏁 v8.0 — Versão final: modo debug e créditos
 > *App mais enxuto, com uma demonstração pronta e a tela de créditos*
 
@@ -188,6 +217,8 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 petfit-sync/
 ├── index.html       ← Header com logo + botão de tema, Ajustes (🔧 debug e Créditos), modal de exercício com botão de vídeo, modal de Créditos
 ├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações
+├── chatbot-kb.js    ← Guia do assistente (app, saúde do pet, atividades da dupla) — EDITE AQUI o que ele sabe
+├── chatbot.js       ← Assistente: chunking + embeddings (WebGPU) + busca híbrida + geração com conferência
 ├── script.js        ← DataLayer + ExerciseVideos/ExerciseDB + Skeletons + Gestures + Motion + ThemeManager + App + DebugMode
 ├── manifest.json    ← PWA manifest (cores da marca)
 └── assets/
