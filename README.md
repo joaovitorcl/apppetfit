@@ -1,19 +1,69 @@
-# 🐾 PetFit Sync
+# 🐾 PetFit
 
 PWA de Gestão de Hábitos para **Pets e Tutores**.
 
-> **Versão atual:** 8.0 | **Sem sincronização manual, modo debug 🔧 e créditos do app**
+> **Versão atual:** 9.0 (final) | **Assistente PetFit na barra inferior, hábitos, exercícios com vídeo, Dark Mode, créditos e modo debug 🔧**
 
 ---
 
 ## 📜 Histórico de Versões
 
-### 🏁 v8.0 — Versão final: modo debug e créditos
+### 🏆 v9.0 — Versão final: Assistente PetFit na barra inferior
+> *O assistente ganha um botão próprio e explica ao público como funciona*
+
+- ✅ **Botão "Assistente PetFit" 🤖** na barra inferior, entre **Evolução** e **Ajustes**. A barra agora tem 6 itens: Hoje · Pet · Evolução · Assistente PetFit · Ajustes · Montar Dupla.
+- ✅ **Abre o chat já explicando como ele funciona**: ao tocar, o Assistente PetFit abre com o cartão **"Como funciona o Assistente PetFit"**, com 6 tópicos curtos: o que ele faz, que tudo roda no aparelho, o que acontece no primeiro uso (permissão antes de baixar os modelos), que só responde com o guia do PetFit, saúde e emergências, e os modos de resposta. Logo abaixo ficam as 4 perguntas sugeridas.
+- ✅ **Não perde a conversa**: se a pessoa já estiver conversando e tocar no botão de novo, a explicação é **acrescentada no fim** da conversa, sem apagar nada.
+- ✅ **Atalho para rever a explicação**: depois de **Limpar conversa**, aparece o chip **"ℹ️ Como o assistente funciona?"** junto das perguntas sugeridas.
+- ✅ **Teclado não abre sozinho** ao tocar no botão (no celular ele cobriria a explicação). O foco vai para o cartão, o que também ajuda leitores de tela.
+- ✅ **Barra com 6 itens sem apertar**: os rótulos podem quebrar em 2 linhas ("Assistente / PetFit", "Montar / Dupla"). Em telas de até 400px o rótulo usa 11px, para caber "Assistente" sem cortar. Testado em 320, 360 e 430px de largura.
+- ✅ **Campo "Dúvidas do app ou do pet?"** da tela Hoje continua igual: abre o mesmo chat já com a pergunta.
+- ✅ **Correções para o deploy**:
+  - os modais de **Montar Dupla** e **Perfil do Tutor** estavam *dentro* do `<nav>`; como a barra usa `transform` e `backdrop-filter`, isso prendia os modais ao tamanho da barra. Agora ficam fora dela e abrem em tela cheia;
+  - removido um bloco de HTML antigo, que deixava um segundo botão com `id="saveProfileBtn"` (id duplicado) e 4 `</div>` sobrando;
+  - `<spam>` corrigido para `<span>` no botão Montar Dupla.
+- ✅ **Versão 9.0** em todo o projeto (Ajustes, cabeçalho do `script.js` e este README).
+
+#### Como editar a explicação do botão
+Abra o `chatbot.js` e procure `const HOWTO`. Cada tópico é `{ icon, titulo, texto }`. Edite, apague ou acrescente itens; o cartão se monta sozinho. Os tamanhos dos modelos (~1,2 GB e ~0,5 GB) vêm de `CONFIG.generators`, então se você trocar o modelo o texto acompanha.
+
+---
+
+### 🤖 v8.1 — Assistente PetFit (chatbot local, WebGPU)
+> *Um campo de uma linha na tela Hoje que abre uma conversa com um assistente que roda no navegador*
+
+- ✅ **Campo de uma linha** no topo da lista de hábitos ("Dúvidas do app ou do pet?"). Ao enviar, abre a conversa (modal **Assistente PetFit**) já com a pergunta.
+- ✅ **RAG no navegador**: o guia (`chatbot-kb.js`) é **quebrado em trechos** (~500 caracteres), **vetorizado** com o modelo [`Xenova/multilingual-e5-small`](https://huggingface.co/Xenova/multilingual-e5-small) (multilíngue, entende português) e consultado por **busca híbrida** (vetores + palavras-chave BM25, fundidas por RRF).
+- ✅ **WebGPU**: embeddings em WebGPU (fp16) quando o aparelho suporta, com **validação dos vetores** e queda automática para WASM (q8). A resposta é gerada por [`onnx-community/Qwen2.5-1.5B-Instruct`](https://huggingface.co/onnx-community/Qwen2.5-1.5B-Instruct) ou `0.5B` (WebGPU, q4f16), com texto em *streaming*.
+- ✅ **Sem alucinação por construção** (veja "Como o assistente evita inventar" abaixo).
+- ✅ **Privacidade**: perguntas e dados da dupla não saem do aparelho. Só os modelos são baixados (Hugging Face / jsDelivr), uma vez, **depois de a pessoa aceitar**, e ficam em cache.
+- ✅ **4 modos** (em *Opções do assistente*): Completo 1,5B (~1,2 GB), Completo leve 0,5B (~0,5 GB), Busca semântica + trechos do guia (sem gerador) e Modo leve (palavras-chave, nada para baixar).
+- ✅ Sem WebGPU (ou sem `shader-f16`) o app **não quebra**: cai para busca semântica + trechos do guia.
+
+#### Como o assistente evita inventar
+1. **Emergências e doses de remédio** (convulsão, envenenamento, "posso dar dipirona?") têm **resposta fixa**, sem IA.
+2. Se a busca **não encontra nada relevante**, ele diz que não sabe, sem chamar o gerador. O limite de "relevante" é **calibrado sozinho**: no primeiro uso, o app mede a similaridade de perguntas sem relação com o guia (futebol, receitas…) e exige que as perguntas reais superem esse ruído.
+3. O gerador recebe **só os trechos encontrados** e a ordem de responder `NAO_ENCONTRADO` quando eles não bastam.
+4. A resposta é **conferida**: números, links/telefones ou vocabulário que não existam nos trechos fazem o app **descartar** o texto gerado e mostrar o trecho original do guia.
+5. Toda resposta mostra a **fonte** (título do assunto do guia). Respostas de saúde trazem o aviso de que não substituem o veterinário.
+
+#### Como editar o conteúdo do assistente
+Abra o `chatbot-kb.js`. Cada assunto é `{ id, tema, titulo, texto }`; separe os parágrafos com uma linha em branco. Ao salvar, os vetores são recalculados sozinhos. **Se algo não estiver no guia, o assistente não responde.** Para saúde, escreva só orientações gerais e nunca doses.
+
+#### Como testar e ajustar
+- Abra o app com `?chatdebug` na URL (ou `localStorage.setItem('petfit_chat_debug','1')`) para ver, em cada resposta, `cos` (similaridade), `limite` (ruído calibrado), `lex` e `cob` (palavras-chave) e `conf`.
+- Se ele recusar perguntas boas, diminua `CONFIG.denseMargin` (ex.: `-0.02`) em `chatbot.js`. Se aceitar perguntas fora do assunto, aumente (ex.: `0.02`).
+- O app precisa ser aberto por **http(s) ou localhost** (WebGPU e módulos exigem contexto seguro), não por `file://`.
+- Em um futuro Service Worker real, **não cacheie** requisições cross-origin do `huggingface.co`: o Transformers.js já guarda os modelos no Cache do navegador.
+
+---
+
+### 🏁 v8.0 — Modo debug e créditos
 > *App mais enxuto, com uma demonstração pronta e a tela de créditos*
 
 - ✅ **Sincronização manual removida**: saíram o botão **Sincronizar** da barra inferior e o gesto de **puxar para baixo para atualizar** (indicador, textos e estilos incluídos). Os dados continuam salvos automaticamente a cada ação.
 - ✅ **Botão "Novo Hábito" centralizado**: agora é o único botão da barra inferior, no centro da tela.
-- ✅ **Modo debug 🔧**: um ícone de chave inglesa pequeno nos **Ajustes**, ao lado de "PetFit v8.0". Ao tocar, carrega um **perfil de demonstração** e abre a "Evolução da Dupla" com o histórico de 7 dias: **altos e baixos na segunda e na terça**, **crescimento a partir da quarta** até o sábado, e **queda no domingo**. Tocar no 🔧 de novo (ou recarregar a página) volta aos seus dados.
+- ✅ **Modo debug 🔧**: um ícone de chave inglesa pequeno nos **Ajustes**, ao lado de "PetFit v9.0". Ao tocar, carrega um **perfil de demonstração** e abre a "Evolução da Dupla" com o histórico de 7 dias: **altos e baixos na segunda e na terça**, **crescimento a partir da quarta** até o sábado, e **queda no domingo**. Tocar no 🔧 de novo (ou recarregar a página) volta aos seus dados.
 - ✅ **Debug seguro**: no modo debug nada é gravado, então seus dados reais não são sobrescritos mesmo que você marque hábitos durante a demonstração.
 - ✅ **Debug desativável pelo VSCode**: veja **"Como desativar o modo debug"** abaixo.
 - ✅ **Créditos do app**: nova opção nos **Ajustes**, logo abaixo de "Restaurar dados da dupla". Abre um modal com mensagem de agradecimento, o logo do PetFit e **3 criadores** em fotos circulares, com o nome embaixo. As fotos e os nomes são editados direto no `index.html` (veja **"Como editar os criadores"**).
@@ -185,18 +235,22 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 ## 📁 Estrutura
 
 ```
-petfit-sync/
-├── index.html       ← Header com logo + botão de tema, Ajustes (🔧 debug e Créditos), modal de exercício com botão de vídeo, modal de Créditos
-├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações
+apppetfit/
+├── index.html       ← Header com logo + botão de tema, barra inferior (6 itens, com o Assistente PetFit), Ajustes (🔧 debug e Créditos), modais (exercício, créditos, assistente)
+├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações + chat
 ├── script.js        ← DataLayer + ExerciseVideos/ExerciseDB + Skeletons + Gestures + Motion + ThemeManager + App + DebugMode
+├── chatbot.js       ← Assistente: chunking + embeddings (WebGPU) + busca híbrida + geração com conferência + cartão "Como funciona"
+├── chatbot-kb.js    ← Guia do assistente (app, saúde do pet, atividades da dupla). EDITE AQUI o que ele sabe
 ├── manifest.json    ← PWA manifest (cores da marca)
+├── README.md
 └── assets/
     ├── criadores/           ← fotos dos criadores (veja o LEIA-ME.txt desta pasta)
     └── icons/
         ├── logo.png         ← SEU LOGO do header e dos créditos (substitua este arquivo)
         ├── Petfitlogo.png   ← Favicon
         ├── iconavatar1.png  ← Avatar padrão (placeholder dos criadores)
-        └── icon-*.svg       ← Placeholders (substitua por PNGs reais)
+        ├── iconpet1.png     ← Ícone do pet
+        └── icon-*.svg       ← Placeholders (substitua por PNGs reais, veja "Pendências")
 ```
 
 ---
@@ -353,19 +407,49 @@ Dicas: use PNG quadrado (ideal 256×256 ou mais) e com pouca margem em branco ao
 
 ## 🚀 Deploy no Vercel
 
+O PetFit é um **site estático** (HTML + CSS + JS), sem build e sem servidor. A pasta que contém o `index.html` já é o projeto inteiro.
+
+**Opção A: pela linha de comando (envia a pasta direto)**
+
 ```bash
-cd petfit-sync
+unzip apppetfit_v9_final.zip
+cd apppetfit
 npx vercel --prod
 ```
 
-Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
+Quando a CLI perguntar, responda: *Framework Preset* **Other**, *Build Command* e *Output Directory* **vazios**.
+
+**Opção B: pelo GitHub**
+
+1. Suba a pasta para um repositório.
+2. Em [vercel.com/new](https://vercel.com/new), importe o repositório.
+3. *Framework Preset*: **Other**. Deixe *Build Command* e *Output Directory* vazios. *Root Directory*: a pasta onde está o `index.html`.
+
+> ℹ️ O painel da Vercel importa repositórios Git; ele não recebe um `.zip` direto. Para enviar sem Git, descompacte e use a Opção A.
+
+**Depois do deploy, confira:**
+
+1. Abra a URL `https://…vercel.app` no celular (o assistente exige **HTTPS**; a Vercel já entrega).
+2. Toque em **Assistente PetFit** 🤖 na barra: deve abrir o chat com o cartão "Como funciona".
+3. Escolha *Modo leve* em **Opções do assistente** e faça uma pergunta (ex.: "Como concluo um hábito?"). Não baixa nada.
+4. Toque em **Montar Dupla** 🎨: o modal deve abrir em tela cheia.
+
+**Sobre o assistente em produção**
+- Os modelos vêm do `huggingface.co` e a biblioteca do `cdn.jsdelivr.net`. Se um dia você adicionar uma *Content-Security-Policy*, libere esses dois domínios.
+- Nada é cobrado nem processado no servidor: a IA roda no aparelho de quem usa.
 
 ---
 
-## ⚡ Funcionalidades Completas (v8.0)
+## ⚡ Funcionalidades Completas (v9.0)
 
 | Categoria | Feature | Status |
 |---|---|---|
+| **Assistente** | Botão "Assistente PetFit" 🤖 na barra inferior, que abre o chat | ✅ |
+| **Assistente** | Cartão "Como funciona" com 6 tópicos para o público | ✅ |
+| **Assistente** | Campo "Dúvidas do app ou do pet?" na tela Hoje | ✅ |
+| **Assistente** | RAG no navegador (WebGPU) com 4 modos, incluindo Modo leve sem download | ✅ |
+| **Assistente** | Resposta fixa para emergências e doses, fonte em toda resposta, conferência anti-invenção | ✅ |
+| **Assistente** | Privacidade: perguntas e dados da dupla não saem do aparelho | ✅ |
 | **Exercícios** | 77 exercícios filtrados por categoria, título e horário do hábito | ✅ |
 | **Exercícios** | Etiqueta de momento (antes, durante ou depois da tarefa) e dica de segurança própria | ✅ |
 | **Exercícios** | Botão discreto "Ver vídeo" (YouTube) abaixo do exercício, com 27 vídeos | ✅ |
@@ -382,7 +466,7 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 | **Gestures** | Swipe-to-Dismiss nos modais | ✅ |
 | **Gestures** | Gesture Hint educativo | ✅ |
 | **UI** | Skeleton Screens com shimmer | ✅ |
-| **UI** | Thumb-Friendly Zone, botão "Novo Hábito" centralizado | ✅ |
+| **UI** | Thumb-Friendly Zone, botão "Novo Hábito" centralizado, barra de 6 itens | ✅ |
 | **UI** | Créditos do app com logo e 3 criadores editáveis | ✅ |
 | **Debug** | Modo debug 🔧 com perfil de demonstração (desativável por comentário) | ✅ |
 | **Dados** | DataLayer (localStorage/Firebase) | ✅ |
@@ -398,8 +482,11 @@ Ou arraste o `.zip` em [vercel.com/new](https://vercel.com/new).
 
 ---
 
-### ⚠️ Nota sobre o modo offline
-O Service Worker é registrado a partir de um `Blob` dentro do `script.js`, e os navegadores **não aceitam** script `blob:` para Service Worker (aparece "Erro no SW" no console). Por isso o app funciona, mas ainda **não abre offline** nem é instalável com cache. Para ativar de verdade: mover o código do SW para um arquivo `sw.js` na raiz e registrar com `navigator.serviceWorker.register('sw.js')`. Foi deixado de fora da v4.0 de propósito: um cache offline faria o logo novo demorar a aparecer quando você trocar o PNG.
+### ⚠️ Pendências conhecidas
+
+- **Modo offline (Service Worker)**: o Service Worker é registrado a partir de um `Blob` dentro do `script.js`, e os navegadores **não aceitam** script `blob:` para Service Worker (aparece "Erro no SW" no console). Por isso o app funciona, mas ainda **não abre offline** nem é instalável com cache. Para ativar de verdade: mover o código do SW para um arquivo `sw.js` na raiz e registrar com `navigator.serviceWorker.register('sw.js')`. Em um SW real, **não cacheie** requisições do `huggingface.co`: o Transformers.js já guarda os modelos no cache do navegador.
+- **Ícones do app instalado**: o `manifest.json` e os `apple-touch-icon` do `index.html` apontam para `assets/icons/icon-192x192.png` e `icon-512x512.png`, que ainda **não existem** (só os `.svg` de placeholder). O app abre normalmente, mas, ao "Adicionar à tela inicial", o ícone não aparece. Para resolver, gere esses dois PNGs a partir do `logo.png` e salve-os em `assets/icons/`.
+- **Vídeos do YouTube** podem ser removidos pelo autor. Vale testar os links de vez em quando.
 
 ---
 

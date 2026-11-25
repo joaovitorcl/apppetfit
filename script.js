@@ -1,12 +1,13 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- *  PETFIT SYNC v8.0 — script.js
+ *  PETFIT v9.0 — script.js
  *  PWA de Gestão de Hábitos para Pets e Tutores
  *  Features: Skeletons | DataLayer | Gestures (Swipe, Long-Press)
  *            + Dark Mode Adaptativo | Microinterações | Tipografia Escalonável
  *            + Exercícios por categoria com vídeo-tutorial no YouTube (v6.0)
  *            + Exercícios ligados ao contexto da tarefa: fase, título, horário e segurança (v7.0)
  *            + Sem sincronização manual | Modo debug 🔧 | Créditos do app (v8.0)
+ *            + Assistente PetFit (chatbot local, chatbot.js) com botão na barra inferior (v8.1 / v9.0)
  *  ═══════════════════════════════════════════════════════════════
  */
 
@@ -1203,11 +1204,18 @@ async finishProfileSetup() {
     return streak;
   },
 
+  /** v9.0 — Botão "Assistente PetFit" da barra: abre o chat já explicando como ele funciona (chatbot.js → PetChat.openGuide) */
+  openAssistant() {
+    if (window.PetChat && typeof window.PetChat.openGuide === 'function') window.PetChat.openGuide();
+    else this.showToast('O assistente não carregou. Recarregue a página.', 'error');
+  },
+
   switchTab(tabName) {
     document.querySelectorAll('.nav-item').forEach(item=>item.classList.toggle('active', item.dataset.tab===tabName));
     if(tabName==='pet') this.openProfile();
     else if(tabName==='stats') this.openStats();
     else if(tabName==='settings') this.openSettings();
+    else if(tabName==='assistant') this.openAssistant();
     if(tabName!=='today') setTimeout(()=>{ document.querySelectorAll('.nav-item').forEach(item=>item.classList.toggle('active', item.dataset.tab==='today')); }, 300);
   },
 
@@ -1420,7 +1428,7 @@ if (petPhotoInput) {
 // ═══════════════════════════════════════════════════════════════
 //  SEÇÃO 8: MODO DEBUG 🔧 (v8.0) — OPCIONAL
 // ═══════════════════════════════════════════════════════════════
-//  O que faz: o ícone 🔧 (Ajustes, ao lado de "PetFit v8.0") carrega um
+//  O que faz: o ícone 🔧 (Ajustes, ao lado de "PetFit v9.0") carrega um
 //  perfil de DEMONSTRAÇÃO com a evolução da dupla nos últimos 7 dias:
 //  altos e baixos na segunda e na terça, crescimento a partir da quarta
 //  e queda no domingo. Nada é gravado: seus dados reais ficam intactos.
