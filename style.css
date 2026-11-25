@@ -1187,7 +1187,6 @@ html.theme-fade, html.theme-fade *, html.theme-fade *::before, html.theme-fade *
 @media (prefers-reduced-motion: reduce) {
   .chat-streaming .chat-text::after { animation: none; }
 }
-<<<<<<< HEAD
 
 /* ===== v9.0 · BOTÃO "ASSISTENTE PETFIT" NA BARRA + CARTÃO "COMO FUNCIONA" ===== */
 /* Com 6 itens na barra, os rótulos podem quebrar em 2 linhas (ex.: "Assistente / PetFit") */
@@ -1204,5 +1203,3 @@ html.theme-fade, html.theme-fade *, html.theme-fade *::before, html.theme-fade *
 .chat-howto p.chat-howto-text { margin: 0; font-size: var(--fs-sm); line-height: 1.45; color: var(--text-secondary); }
 .chat-howto .chat-chips { margin-top: 2px; }
 .chat-howto:focus { outline: none; }
-=======
->>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0

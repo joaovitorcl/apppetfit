@@ -1384,6 +1384,11 @@ if (petPhotoInput) {
     document.getElementById('doneExercise').addEventListener('click', ()=>this.completeExerciseAndHabit());
     document.getElementById('exerciseVideoLink').addEventListener('click', ()=>Motion.haptic(10));
     document.querySelectorAll('.nav-item').forEach(item=>item.addEventListener('click', ()=>this.switchTab(item.dataset.tab)));
+    // v9.0 — Proteção: se o chatbot.js não carregar, o campo "Dúvidas do app ou do pet?" não pode recarregar a página (envio nativo do <form>)
+    document.getElementById('askBar')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      if(!(window.PetChat && typeof window.PetChat.open==='function')) this.showToast('O assistente não carregou. Recarregue a página.', 'error');
+    });
     document.querySelectorAll('.filter-chip').forEach(chip=>chip.addEventListener('click', (e)=>{
       document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
       e.currentTarget.classList.add('active');
@@ -1516,6 +1521,11 @@ const DebugMode = {
 };
 
 document.addEventListener('DOMContentLoaded', ()=>{ App.init(); });
+// v9.0 — Diagnóstico: o app funciona sem o assistente, mas avisa no console o que está faltando
+window.addEventListener('load', ()=>{
+  if(!window.PetChat || typeof window.PetChat.open!=='function')
+    console.error('[PetFit] O Assistente não carregou. Confira se chatbot.js e chatbot-kb.js estão na MESMA pasta do index.html (e foram enviados no deploy).');
+});
 
 
 const tutorPhotoInput = document.getElementById('tutorPhotoInput');

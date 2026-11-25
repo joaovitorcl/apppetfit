@@ -8,7 +8,6 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 
 ## 📜 Histórico de Versões
 
-<<<<<<< HEAD
 ### 🏆 v9.0 — Versão final: Assistente PetFit na barra inferior
 > *O assistente ganha um botão próprio e explica ao público como funciona*
 
@@ -24,14 +23,14 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
   - removido um bloco de HTML antigo, que deixava um segundo botão com `id="saveProfileBtn"` (id duplicado) e 4 `</div>` sobrando;
   - `<spam>` corrigido para `<span>` no botão Montar Dupla.
 - ✅ **Versão 9.0** em todo o projeto (Ajustes, cabeçalho do `script.js` e este README).
+- ✅ **O site não depende mais do chatbot para funcionar**: se `chatbot.js` ou `chatbot-kb.js` não chegarem (arquivo esquecido no deploy, por exemplo), o app continua inteiro, o campo "Dúvidas do app ou do pet?" **não recarrega mais a página** e aparece o aviso *"O assistente não carregou"*. O console do navegador diz exatamente o que falta.
+- ✅ **Sem mistura de versões velhas e novas**: `style.css`, `script.js`, `chatbot.js` e `chatbot-kb.js` agora são chamados com `?v=9.0` no `index.html`, para o navegador nunca usar uma cópia antiga em cache. Ao publicar uma versão nova, mude o número nas 4 linhas.
 
 #### Como editar a explicação do botão
 Abra o `chatbot.js` e procure `const HOWTO`. Cada tópico é `{ icon, titulo, texto }`. Edite, apague ou acrescente itens; o cartão se monta sozinho. Os tamanhos dos modelos (~1,2 GB e ~0,5 GB) vêm de `CONFIG.generators`, então se você trocar o modelo o texto acompanha.
 
 ---
 
-=======
->>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
 ### 🤖 v8.1 — Assistente PetFit (chatbot local, WebGPU)
 > *Um campo de uma linha na tela Hoje que abre uma conversa com um assistente que roda no navegador*
 
@@ -61,11 +60,7 @@ Abra o `chatbot-kb.js`. Cada assunto é `{ id, tema, titulo, texto }`; separe os
 
 ---
 
-<<<<<<< HEAD
 ### 🏁 v8.0 — Modo debug e créditos
-=======
-### 🏁 v8.0 — Versão final: modo debug e créditos
->>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
 > *App mais enxuto, com uma demonstração pronta e a tela de créditos*
 
 - ✅ **Sincronização manual removida**: saíram o botão **Sincronizar** da barra inferior e o gesto de **puxar para baixo para atualizar** (indicador, textos e estilos incluídos). Os dados continuam salvos automaticamente a cada ação.
@@ -242,17 +237,9 @@ Abra o `chatbot-kb.js`. Cada assunto é `{ id, tema, titulo, texto }`; separe os
 ## 📁 Estrutura
 
 ```
-<<<<<<< HEAD
 apppetfit/
 ├── index.html       ← Header com logo + botão de tema, barra inferior (6 itens, com o Assistente PetFit), Ajustes (🔧 debug e Créditos), modais (exercício, créditos, assistente)
 ├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações + chat
-=======
-petfit-sync/
-├── index.html       ← Header com logo + botão de tema, Ajustes (🔧 debug e Créditos), modal de exercício com botão de vídeo, modal de Créditos
-├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações
-├── chatbot-kb.js    ← Guia do assistente (app, saúde do pet, atividades da dupla) — EDITE AQUI o que ele sabe
-├── chatbot.js       ← Assistente: chunking + embeddings (WebGPU) + busca híbrida + geração com conferência
->>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
 ├── script.js        ← DataLayer + ExerciseVideos/ExerciseDB + Skeletons + Gestures + Motion + ThemeManager + App + DebugMode
 ├── chatbot.js       ← Assistente: chunking + embeddings (WebGPU) + busca híbrida + geração com conferência + cartão "Como funciona"
 ├── chatbot-kb.js    ← Guia do assistente (app, saúde do pet, atividades da dupla). EDITE AQUI o que ele sabe
@@ -448,6 +435,21 @@ Quando a CLI perguntar, responda: *Framework Preset* **Other**, *Build Command* 
 2. Toque em **Assistente PetFit** 🤖 na barra: deve abrir o chat com o cartão "Como funciona".
 3. Escolha *Modo leve* em **Opções do assistente** e faça uma pergunta (ex.: "Como concluo um hábito?"). Não baixa nada.
 4. Toque em **Montar Dupla** 🎨: o modal deve abrir em tela cheia.
+
+**Arquivos que precisam estar no deploy** (todos na mesma pasta, ao lado do `index.html`):
+
+`index.html` · `style.css` · `script.js` · `chatbot.js` · `chatbot-kb.js` · `manifest.json` · pasta `assets/`
+
+**Se algo falhar**
+
+| Sintoma | Causa provável | Solução |
+|---|---|---|
+| Aparece "O assistente não carregou" ou o chat não abre | `chatbot.js` / `chatbot-kb.js` não foram enviados ou estão em outra pasta | Confira os 2 arquivos ao lado do `index.html`. No navegador, abra o Console (F12): o app diz o que falta |
+| Site abre em branco ou dá 404 na Vercel | O *Root Directory* aponta para a pasta errada (a que contém `apppetfit/` em vez do `index.html`) | Em *Settings → General → Root Directory*, escolha a pasta onde está o `index.html` |
+| Mudei um arquivo e o navegador mostra o antigo | Cache | Atualize o número `?v=` no `index.html`, ou recarregue com Ctrl+Shift+R |
+| O chat não abre ao testar com duplo clique no `index.html` | O assistente exige `http(s)` ou `localhost` | Teste pela URL do Vercel, ou rode `npx serve` na pasta |
+
+**Atenção ao usar Git:** se você mantém o projeto em um repositório, confirme que `chatbot.js` e `chatbot-kb.js` estão **commitados** (`git status`). Eles já estiveram só em um commit remoto e faltando na pasta local.
 
 **Sobre o assistente em produção**
 - Os modelos vêm do `huggingface.co` e a biblioteca do `cdn.jsdelivr.net`. Se um dia você adicionar uma *Content-Security-Policy*, libere esses dois domínios.
