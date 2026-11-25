@@ -8,6 +8,7 @@ PWA de Gestão de Hábitos para **Pets e Tutores**.
 
 ## 📜 Histórico de Versões
 
+<<<<<<< HEAD
 ### 🏆 v9.0 — Versão final: Assistente PetFit na barra inferior
 > *O assistente ganha um botão próprio e explica ao público como funciona*
 
@@ -29,6 +30,8 @@ Abra o `chatbot.js` e procure `const HOWTO`. Cada tópico é `{ icon, titulo, te
 
 ---
 
+=======
+>>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
 ### 🤖 v8.1 — Assistente PetFit (chatbot local, WebGPU)
 > *Um campo de uma linha na tela Hoje que abre uma conversa com um assistente que roda no navegador*
 
@@ -58,7 +61,11 @@ Abra o `chatbot-kb.js`. Cada assunto é `{ id, tema, titulo, texto }`; separe os
 
 ---
 
+<<<<<<< HEAD
 ### 🏁 v8.0 — Modo debug e créditos
+=======
+### 🏁 v8.0 — Versão final: modo debug e créditos
+>>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
 > *App mais enxuto, com uma demonstração pronta e a tela de créditos*
 
 - ✅ **Sincronização manual removida**: saíram o botão **Sincronizar** da barra inferior e o gesto de **puxar para baixo para atualizar** (indicador, textos e estilos incluídos). Os dados continuam salvos automaticamente a cada ação.
@@ -235,9 +242,17 @@ Abra o `chatbot-kb.js`. Cada assunto é `{ id, tema, titulo, texto }`; separe os
 ## 📁 Estrutura
 
 ```
+<<<<<<< HEAD
 apppetfit/
 ├── index.html       ← Header com logo + botão de tema, barra inferior (6 itens, com o Assistente PetFit), Ajustes (🔧 debug e Créditos), modais (exercício, créditos, assistente)
 ├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações + chat
+=======
+petfit-sync/
+├── index.html       ← Header com logo + botão de tema, Ajustes (🔧 debug e Créditos), modal de exercício com botão de vídeo, modal de Créditos
+├── style.css        ← Paleta + tema claro/escuro + escala tipográfica + animações
+├── chatbot-kb.js    ← Guia do assistente (app, saúde do pet, atividades da dupla) — EDITE AQUI o que ele sabe
+├── chatbot.js       ← Assistente: chunking + embeddings (WebGPU) + busca híbrida + geração com conferência
+>>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
 ├── script.js        ← DataLayer + ExerciseVideos/ExerciseDB + Skeletons + Gestures + Motion + ThemeManager + App + DebugMode
 ├── chatbot.js       ← Assistente: chunking + embeddings (WebGPU) + busca híbrida + geração com conferência + cartão "Como funciona"
 ├── chatbot-kb.js    ← Guia do assistente (app, saúde do pet, atividades da dupla). EDITE AQUI o que ele sabe

@@ -742,6 +742,7 @@
     'Exercícios para fazer com meu cachorro'
   ];
 
+<<<<<<< HEAD
   /* ── v9.0 · "Como funciona": explicação para o público, aberta pelo botão "Assistente PetFit" da barra ── */
   const G15 = CONFIG.generators['full-1.5b'], G05 = CONFIG.generators['full-0.5b'];
   const HOWTO = [
@@ -787,6 +788,11 @@
   }
 
   function addChips(host) {
+=======
+  function renderWelcome() {
+    el.messages.textContent = '';
+    const m = addMsg('bot', greetingText());
+>>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
     const chips = document.createElement('div');
     chips.className = 'chat-chips';
     SUGGESTIONS.forEach(s => {
@@ -795,6 +801,7 @@
       b.addEventListener('click', () => { chips.remove(); ask(s); });
       chips.appendChild(b);
     });
+<<<<<<< HEAD
     host.appendChild(chips);
   }
 
@@ -837,6 +844,9 @@
     how.type = 'button'; how.className = 'chat-chip chat-chip-how'; how.textContent = 'ℹ️ Como o assistente funciona?';
     how.addEventListener('click', () => { how.remove(); revealTop(addGuideCard()); });
     m.bubble.querySelector('.chat-chips').appendChild(how);
+=======
+    m.bubble.appendChild(chips);
+>>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
     state.history = []; state.lastQ = '';
   }
 
@@ -897,6 +907,10 @@
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+<<<<<<< HEAD
   Object.assign(root.PetChat, { ask, open, openGuide, close, state });
+=======
+  Object.assign(root.PetChat, { ask, open, close, state });
+>>>>>>> 47c3cfd756ebc4a5df23a8c1208053e46ab6e4e0
 
 })(typeof window !== 'undefined' ? window : globalThis);
